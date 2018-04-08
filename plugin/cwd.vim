@@ -5,6 +5,34 @@ let g:loaded_cwd = 1
 
 " https://github.com/airblade/vim-rooter
 
+" FIXME:
+"     :tabedit ~/.vim/plugged/vimtex/doc/vimtex.txt
+"
+" Why isn't the working directory `~/.vim/plugged/vimtex/`?
+
+" TODO:
+" :tabedit $MYVIMRC
+" :fin * C-d
+" Why do these suggestions use full paths?:
+"
+"         /home/user/.vim/plugged/
+"         /home/user/.vim/plugin/
+"         /home/user/.vim/pythonx/
+"         /home/user/.vim/tags
+"
+" All the other ones don't.
+" Also, why does it occur only when we do `:set path=.,**` but not `set path=.`?
+"
+" Theory:
+" Maybe it's because there's a `tags` file in the working directory.
+" And a `plugin/` directory, which begins with the letter `p`.
+" So, there may be some kind of ambiguity with all suggestions coming from
+" the directory of the current file, when their name is begin with `t` or `p`.
+
+" TODO:
+" Study which  path we can write  in a file in  a project, which will  work with
+" `gf`. I mean, what's the impact of 'path'? How short can we write a path?
+
 " Integrate this: {{{1
 
 if has('vim_starting') && $PWD is# $HOME
@@ -84,7 +112,7 @@ let g:cwd_targets = '/,*'
 
 let g:cwd_change_directory_for_non_project_files = ''
 
-let g:cwd_silent_chdir = 0
+let g:cwd_silent_chdir = 1
 
 let g:cwd_resolve_links = 0
 
