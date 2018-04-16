@@ -5,11 +5,6 @@ let g:loaded_cwd = 1
 
 " https://github.com/airblade/vim-rooter
 
-" FIXME:
-"     :tabedit ~/.vim/plugged/vimtex/doc/vimtex.txt
-"
-" Why isn't the working directory `~/.vim/plugged/vimtex/`?
-
 " TODO:
 " :tabedit $MYVIMRC
 " :fin * C-d
@@ -32,6 +27,10 @@ let g:loaded_cwd = 1
 " TODO:
 " Study which  path we can write  in a file in  a project, which will  work with
 " `gf`. I mean, what's the impact of 'path'? How short can we write a path?
+
+" TODO:
+" `latex/`, `terminal/`, `vim/`, ... should  be automatically set as the working
+" directory when we're reading our notes or working on our exercises.
 
 " Integrate this: {{{1
 
