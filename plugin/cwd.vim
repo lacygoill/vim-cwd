@@ -86,7 +86,10 @@ fu! s:reset_working_directory() abort
     let orig = win_getid()
     sil tabdo windo cd $HOME/.vim
     call win_gotoid(orig)
-    call timer_start(0, {-> execute('pwd', '')})
+    " If the message is immediately erased, don't use a timer to fix the issue.
+    " First, try a simple `:redraw` before `:pwd`.
+    " See `:h :echo-redraw`.
+    pwd
 endfu
 
 " Command {{{1
