@@ -52,16 +52,18 @@ nno  <silent><unique>  d:  :<c-u>call <sid>cd_to_project_root(1)<cr>
 fu! s:cd_to_project_root(locally) abort
     let dir = expand('%:p')
 
-    let known_dirs = [ 'autoload',
-    \                  'colors',
-    \                  'compiler',
-    \                  'doc',
-    \                  'ftdetect',
-    \                  'ftplugin',
-    \                  'indent',
-    \                  'plugin',
-    \                  'syntax',
-    \                  'CODE' ]
+    let known_dirs = [
+        \ 'autoload',
+        \ 'colors',
+        \ 'compiler',
+        \ 'doc',
+        \ 'ftdetect',
+        \ 'ftplugin',
+        \ 'indent',
+        \ 'plugin',
+        \ 'syntax',
+        \ 'CODE',
+        \ ]
 
     let guard = 0
     while guard <= 100
