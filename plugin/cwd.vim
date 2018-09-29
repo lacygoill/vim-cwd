@@ -96,7 +96,7 @@ endfu
 
 " Command {{{1
 
-com! Cwd  call s:cd_to_project_root()
+com! -bar  Cwd  call s:cd_to_project_root()
 
 " Autocmd {{{1
 
