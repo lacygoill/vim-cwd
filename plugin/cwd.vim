@@ -177,7 +177,9 @@ fu! s:change_directory(directory) abort "{{{1
         if !g:cwd_silent_chdir
             echo 'cwd: '.a:directory
         endif
-        sil do <nomodeline> User CwdChDir
+        if exists('#User#CwdChDir')
+            do <nomodeline> User CwdChDir
+        endif
     endif
 endfu
 
@@ -201,12 +203,13 @@ endfu
 
 fu! s:find_ancestor(pattern) abort "{{{1
     let fd_dir = isdirectory(s:fd) ? s:fd : fnamemodify(s:fd, ':h')
+    let fd_dir_escaped = escape(fd_dir, ' ')
 
     if s:is_directory(a:pattern)
-        let match = finddir(a:pattern, fnameescape(fd_dir).';')
+        let match = finddir(a:pattern, fd_dir_escaped.';')
     else
         let [_suffixesadd, &suffixesadd] = [&suffixesadd, '']
-        let match = findfile(a:pattern, fnameescape(fd_dir).';')
+        let match = findfile(a:pattern, fd_dir_escaped.';')
         let &suffixesadd = _suffixesadd
     endif
 
@@ -214,9 +217,18 @@ fu! s:find_ancestor(pattern) abort "{{{1
         return ''
     endif
 
-    return s:is_directory(a:pattern)
-    \ ?        fnamemodify(match, ':p:h:h')
-    \ :        fnamemodify(match, ':p:h')
+    if s:is_directory(a:pattern)
+        " If the directory we found (`match`) is  part of the file's path, it is
+        " the project root and we return it.
+        " Otherwise,  the directory  we found  is contained  within the  project
+        " root, so return its parent i.e. the project root.
+        let fd_match = fnamemodify(match, ':p:h')
+        return stridx(fd_dir, fd_match) == 0
+            \ ?     fd_match
+            \ :     fnamemodify(match, ':p:h:h')
+    else
+        return fnamemodify(match, ':p:h')
+    endif
 endfu
 
 fu! s:is_directory(pattern) abort "{{{1
