@@ -6,6 +6,10 @@ let g:loaded_cwd = 1
 " https://github.com/airblade/vim-rooter
 
 " TODO:
+" Study this plugin:
+" https://github.com/mattn/vim-findroot/blob/master/plugin/findroot.vim
+
+" TODO:
 " :tabedit $MYVIMRC
 " :fin * C-d
 " Why do these suggestions use full paths?:
