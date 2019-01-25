@@ -78,9 +78,9 @@ endfu
 
 fu! s:search_root() abort "{{{2
     for pat in ['.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
-        let result = s:find_ancestor(pat)
-        if !empty(result)
-            return result
+        let root = s:find_ancestor(pat)
+        if !empty(root)
+            return root
         endif
     endfor
     return ''
