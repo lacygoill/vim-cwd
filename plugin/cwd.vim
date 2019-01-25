@@ -28,7 +28,6 @@ let g:loaded_cwd = 1
 augroup my_cwd
     au!
     au VimEnter,BufEnter  *  call s:cd_root()
-    " au BufWritePost       *  call setbufvar('%', 'root_dir', '') | call s:cd_root()
 augroup END
 
 " Interface {{{1
