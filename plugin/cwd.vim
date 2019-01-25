@@ -43,7 +43,7 @@ fu! s:cd_root() abort "{{{2
         return
     endif
 
-    let root_dir = s:get_root()
+    let root_dir = s:get_root_dir()
     if empty(root_dir)
         " Do NOT use `$HOME` as a default root directory!{{{
         "
@@ -65,28 +65,24 @@ fu! s:cd_root() abort "{{{2
 endfu
 " }}}1
 " Core {{{1
-fu! s:get_root() abort "{{{2
+fu! s:get_root_dir() abort "{{{2
     let root_dir = getbufvar('%', 'root_dir')
     if empty(root_dir)
-        let root_dir = s:search_root()
+        for pat in ['.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
+            let root_dir = s:find_root_dir(pat)
+            if !empty(root_dir)
+                break
+            endif
+        endfor
         if !empty(root_dir)
+            " cache the result
             call setbufvar('%', 'root_dir', root_dir)
         endif
     endif
     return root_dir
 endfu
 
-fu! s:search_root() abort "{{{2
-    for pat in ['.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
-        let root = s:find_ancestor(pat)
-        if !empty(root)
-            return root
-        endif
-    endfor
-    return ''
-endfu
-
-fu! s:find_ancestor(pat) abort "{{{2
+fu! s:find_root_dir(pat) abort "{{{2
     let fd_dir = isdirectory(s:bufname) ? s:bufname : fnamemodify(s:bufname, ':h')
     let fd_dir_escaped = escape(fd_dir, ' ')
 
