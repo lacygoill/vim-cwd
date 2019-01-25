@@ -114,8 +114,6 @@ let g:cwd_targets = '/,*'
 
 let g:cwd_change_directory_for_non_project_files = ''
 
-let g:cwd_resolve_links = 0
-
 fu! Find_root_directory() abort "{{{1
 " For third-parties.  Not used by plugin.
     let s:fd = expand('%:p')
@@ -124,9 +122,7 @@ fu! Find_root_directory() abort "{{{1
         let s:fd = getcwd()
     endif
 
-    if g:cwd_resolve_links
-        let s:fd = resolve(s:fd)
-    endif
+    let s:fd = resolve(s:fd)
 
     if !s:change_directory_for_buffer()
         return ''
@@ -142,9 +138,7 @@ fu! s:cd_root() abort "{{{1
         let s:fd = getcwd()
     endif
 
-    if g:cwd_resolve_links
-        let s:fd = resolve(s:fd)
-    endif
+    let s:fd = resolve(s:fd)
 
     if !s:change_directory_for_buffer()
         return
