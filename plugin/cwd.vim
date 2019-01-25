@@ -142,12 +142,7 @@ fu! s:change_directory(directory) abort "{{{1
 endfu
 
 fu! s:change_directory_for_buffer() abort "{{{1
-    if isdirectory(s:fd)
-    \ || (filereadable(s:fd) && empty(&buftype))
-        return 1
-    endif
-
-    return 0
+    return isdirectory(s:fd) || (filereadable(s:fd) && empty(&buftype))
 endfu
 
 fu! s:find_ancestor(pattern) abort "{{{1
