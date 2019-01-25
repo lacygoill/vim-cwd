@@ -23,6 +23,7 @@ let g:loaded_cwd = 1
 " Study which  path we can write  in a file in  a project, which will  work with
 " `gf`. I mean, what's the impact of 'path'? How short can we write a path?
 
+" TODO:
 " Integrate this: {{{1
 
 "     if has('vim_starting') && $PWD is# $HOME
@@ -84,6 +85,7 @@ let g:loaded_cwd = 1
 "         " See `:h :echo-redraw`.
 "         pwd
 "     endfu
+" }}}1
 
 " Autocmd {{{1
 
