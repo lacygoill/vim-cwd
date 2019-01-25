@@ -13,15 +13,11 @@ let g:loaded_cwd = 1
 " `getcwd(-1)` gives the global directory, and `getcwd(winnr())` the local one.
 "}}}
 
-" https://github.com/airblade/vim-rooter
+" Inspiration: https://github.com/airblade/vim-rooter
 
 " TODO:
 " Study this plugin:
 " https://github.com/mattn/vim-findroot/blob/master/plugin/findroot.vim
-
-" TODO:
-" Study which  path we can write  in a file in  a project, which will  work with
-" `gf`. I mean, what's the impact of 'path'? How short can we write a path?
 
 " Autocmd {{{1
 
