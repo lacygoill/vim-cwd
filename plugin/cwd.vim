@@ -114,8 +114,6 @@ let g:cwd_targets = '/,*'
 
 let g:cwd_change_directory_for_non_project_files = ''
 
-let g:cwd_silent_chdir = 1
-
 let g:cwd_resolve_links = 0
 
 fu! Find_root_directory() abort "{{{1
@@ -171,9 +169,6 @@ endfu
 fu! s:change_directory(directory) abort "{{{1
     if a:directory isnot# getcwd()
         exe 'lcd '.fnameescape(a:directory)
-        if !g:cwd_silent_chdir
-            echo 'cwd: '.a:directory
-        endif
         if exists('#User#CwdChDir')
             do <nomodeline> User CwdChDir
         endif
