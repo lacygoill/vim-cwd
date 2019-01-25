@@ -113,23 +113,6 @@ let g:cwd_patterns = ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
 
 let g:cwd_targets = ['/', '*']
 
-fu! Find_root_directory() abort "{{{1
-" For third-parties.  Not used by plugin.
-    let s:fd = expand('%:p')
-
-    if empty(s:fd)
-        let s:fd = getcwd(winnr())
-    endif
-
-    let s:fd = resolve(s:fd)
-
-    if !s:change_directory_for_buffer()
-        return ''
-    endif
-
-    return s:root_directory()
-endfu
-
 fu! s:cd_root() abort "{{{1
     let s:fd = expand('%:p')
 
