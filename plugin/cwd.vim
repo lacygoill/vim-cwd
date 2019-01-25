@@ -32,16 +32,16 @@ augroup END
 
 " Interface {{{1
 fu! s:cd_root() abort "{{{2
-    let s:fd = expand('%:p')
+    let s:bufname = expand('%:p')
 
-    if empty(s:fd)
-        let s:fd = getcwd(winnr())
+    if empty(s:bufname)
+        let s:bufname = getcwd(winnr())
     endif
 
     " Resolve symbolic links before searching for the project root.
     " This is useful when  editing a file within a project  from a symbolic link
     " outside.
-    let s:fd = resolve(s:fd)
+    let s:bufname = resolve(s:bufname)
 
     if s:is_special()
         return
@@ -91,7 +91,7 @@ fu! s:search_root() abort "{{{2
 endfu
 
 fu! s:find_ancestor(pat) abort "{{{2
-    let fd_dir = isdirectory(s:fd) ? s:fd : fnamemodify(s:fd, ':h')
+    let fd_dir = isdirectory(s:bufname) ? s:bufname : fnamemodify(s:bufname, ':h')
     let fd_dir_escaped = escape(fd_dir, ' ')
 
     if s:is_directory(a:pat)
@@ -133,7 +133,7 @@ fu! s:is_directory(pat) abort "{{{2
 endfu
 
 fu! s:is_special() abort "{{{2
-    return !isdirectory(s:fd) && !empty(&buftype)
+    return !isdirectory(s:bufname) && !empty(&buftype)
 endfu
 
 fu! s:root_dir_is_just_below(root_dir) abort "{{{2
