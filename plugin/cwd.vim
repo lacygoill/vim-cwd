@@ -136,7 +136,15 @@ fu! s:cd_root() abort "{{{1
 
     let root_dir = s:root_directory()
     if empty(root_dir)
-        call s:change_directory($HOME)
+        " Do NOT use `$HOME` as a default root directory!{{{
+        "
+        " Vim would be stuck for too much time after pressing:
+        "
+        "     :fin * C-d
+        "
+        " because there are a lot of files in our home.
+        "}}}
+        call s:change_directory($HOME.'/.vim')
     else
         " If we're in  `~/wiki/foo/bar.md`, we want the working  directory to be
         " `~/wiki/foo`, and not `~/wiki`. So, we may need to add a path component.
