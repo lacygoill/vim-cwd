@@ -3,6 +3,16 @@ if exists('g:loaded_cwd')
 endif
 let g:loaded_cwd = 1
 
+" Read This:{{{
+"
+" The concept of working directory is local to a window.
+"
+" `:pwd` and `getcwd()`  give the local working directory if  there's one in the
+" current window, or the global one otherwise
+"
+" `getcwd(-1)` gives the global directory, and `getcwd(winnr())` the local one.
+"}}}
+
 " https://github.com/airblade/vim-rooter
 
 " TODO:
@@ -31,19 +41,6 @@ let g:loaded_cwd = 1
 " TODO:
 " Study which  path we can write  in a file in  a project, which will  work with
 " `gf`. I mean, what's the impact of 'path'? How short can we write a path?
-
-" TODO:
-" `latex/`, `terminal/`, `vim/`, ... should  be automatically set as the working
-" directory when we're reading our notes or working on our exercises.
-
-" TODO:
-" Document that:
-"    - the concept of working directory is local to a window.
-"
-"    - `:pwd`  and `getcwd()` seem to give the  local working directory
-"      if there's one in the current window, or the global one otherwise
-"
-"    - `getcwd(-1)` gives the global directory, and `getcwd(winnr())` the local one
 
 " Integrate this: {{{1
 
@@ -140,6 +137,11 @@ fu! s:cd_root() abort "{{{1
     if empty(root_dir)
         call s:change_directory($HOME)
     else
+        " If we're in  `~/wiki/foo/bar.md`, we want the working  directory to be
+        " `~/wiki/foo`, and not `~/wiki`.
+        if root_dir is# $HOME.'/wiki' && expand('%:p:h') isnot# $HOME.'/wiki'
+            let root_dir .= '/'.expand('%:p:h:t')
+        endif
         call s:change_directory(root_dir)
     endif
 endfu
