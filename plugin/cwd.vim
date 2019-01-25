@@ -28,7 +28,7 @@ let g:loaded_cwd = 1
 augroup my_cwd
     au!
     au VimEnter,BufEnter  *  call s:cd_root()
-    au BufWritePost       *  call setbufvar('%', 'rootDir', '') | call s:cd_root()
+    au BufWritePost       *  call setbufvar('%', 'root_dir', '') | call s:cd_root()
 augroup END
 
 " Interface {{{1
@@ -106,12 +106,12 @@ fu! s:find_ancestor(pattern) abort "{{{2
     endif
 endfu
 
-fu! s:root_directory() abort "{{{3
-    let root_dir = getbufvar('%', 'rootDir')
+fu! s:root_directory() abort "{{{2
+    let root_dir = getbufvar('%', 'root_dir')
     if empty(root_dir)
         let root_dir = s:search_for_root_directory()
         if !empty(root_dir)
-            call setbufvar('%', 'rootDir', root_dir)
+            call setbufvar('%', 'root_dir', root_dir)
         endif
     endif
     return root_dir
