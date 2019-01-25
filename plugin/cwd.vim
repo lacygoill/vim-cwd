@@ -28,7 +28,7 @@ let g:loaded_cwd = 1
 augroup my_cwd
     au!
     au VimEnter,BufEnter  *  call s:cd_root()
-    au BufWritePost       *  call setbufvar('%', 'root_dir', '') | call s:cd_root()
+    " au BufWritePost       *  call setbufvar('%', 'root_dir', '') | call s:cd_root()
 augroup END
 
 " Interface {{{1
@@ -82,8 +82,8 @@ fu! s:get_root() abort "{{{2
 endfu
 
 fu! s:search_root() abort "{{{2
-    for pattern in ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
-        let result = s:find_ancestor(pattern)
+    for pat in ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
+        let result = s:find_ancestor(pat)
         if !empty(result)
             return result
         endif
@@ -91,15 +91,15 @@ fu! s:search_root() abort "{{{2
     return ''
 endfu
 
-fu! s:find_ancestor(pattern) abort "{{{2
+fu! s:find_ancestor(pat) abort "{{{2
     let fd_dir = isdirectory(s:fd) ? s:fd : fnamemodify(s:fd, ':h')
     let fd_dir_escaped = escape(fd_dir, ' ')
 
-    if s:is_directory(a:pattern)
-        let match = finddir(a:pattern, fd_dir_escaped.';')
+    if s:is_directory(a:pat)
+        let match = finddir(a:pat, fd_dir_escaped.';')
     else
         let [_suffixesadd, &suffixesadd] = [&suffixesadd, '']
-        let match = findfile(a:pattern, fd_dir_escaped.';')
+        let match = findfile(a:pat, fd_dir_escaped.';')
         let &suffixesadd = _suffixesadd
     endif
 
@@ -107,7 +107,7 @@ fu! s:find_ancestor(pattern) abort "{{{2
         return ''
     endif
 
-    if s:is_directory(a:pattern)
+    if s:is_directory(a:pat)
         " If the directory we found (`match`) is  part of the file's path, it is
         " the project root and we return it.
         " Otherwise,  the directory  we found  is contained  within the  project
@@ -129,8 +129,8 @@ endfu
 
 " }}}1
 " Utilities {{{1
-fu! s:is_directory(pattern) abort "{{{2
-    return stridx(a:pattern, '/') !=# -1
+fu! s:is_directory(pat) abort "{{{2
+    return stridx(a:pat, '/') !=# -1
 endfu
 
 fu! s:is_special() abort "{{{2
