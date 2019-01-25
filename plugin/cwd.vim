@@ -123,7 +123,7 @@ fu! s:cd_root() abort "{{{1
     " outside.
     let s:fd = resolve(s:fd)
 
-    if !isdirectory(s:fd) && !empty(&buftype)
+    if s:is_special()
         return
     endif
 
@@ -173,6 +173,10 @@ endfu
 
 fu! s:is_directory(pattern) abort "{{{1
     return stridx(a:pattern, '/') !=# -1
+endfu
+
+fu! s:is_special() abort "{{{1
+    return !isdirectory(s:fd) && !empty(&buftype)
 endfu
 
 fu! s:root_directory() abort "{{{1
