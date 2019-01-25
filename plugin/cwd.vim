@@ -26,7 +26,7 @@ let g:loaded_cwd = 1
 " Maybe it's because there's a `tags` file in the working directory.
 " And a `plugin/` directory, which begins with the letter `p`.
 " So, there may be some kind of ambiguity with all suggestions coming from
-" the directory of the current file, when their name is begin with `t` or `p`.
+" the directory of the current file, when their name begins with `t` or `p`.
 
 " TODO:
 " Study which  path we can write  in a file in  a project, which will  work with
@@ -35,6 +35,15 @@ let g:loaded_cwd = 1
 " TODO:
 " `latex/`, `terminal/`, `vim/`, ... should  be automatically set as the working
 " directory when we're reading our notes or working on our exercises.
+
+" TODO:
+" Document that:
+"    - the concept of working directory is local to a window.
+"
+"    - `:pwd`  and `getcwd()` seem to give the  local working directory
+"      if there's one in the current window, or the global one otherwise
+"
+"    - `getcwd(-1)` gives the global directory, and `getcwd(winnr())` the local one
 
 " Integrate this: {{{1
 
