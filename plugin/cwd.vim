@@ -48,7 +48,7 @@ fu! s:cd_root() abort "{{{2
         return
     endif
 
-    let root_dir = s:root_directory()
+    let root_dir = s:get_root()
     if empty(root_dir)
         " Do NOT use `$HOME` as a default root directory!{{{
         "
@@ -70,10 +70,25 @@ fu! s:cd_root() abort "{{{2
 endfu
 " }}}1
 " Core {{{1
-fu! s:change_directory(directory) abort "{{{2
-    if a:directory isnot# getcwd(winnr())
-        exe 'lcd '.fnameescape(a:directory)
+fu! s:get_root() abort "{{{2
+    let root_dir = getbufvar('%', 'root_dir')
+    if empty(root_dir)
+        let root_dir = s:search_root()
+        if !empty(root_dir)
+            call setbufvar('%', 'root_dir', root_dir)
+        endif
     endif
+    return root_dir
+endfu
+
+fu! s:search_root() abort "{{{2
+    for pattern in ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
+        let result = s:find_ancestor(pattern)
+        if !empty(result)
+            return result
+        endif
+    endfor
+    return ''
 endfu
 
 fu! s:find_ancestor(pattern) abort "{{{2
@@ -106,26 +121,12 @@ fu! s:find_ancestor(pattern) abort "{{{2
     endif
 endfu
 
-fu! s:root_directory() abort "{{{2
-    let root_dir = getbufvar('%', 'root_dir')
-    if empty(root_dir)
-        let root_dir = s:search_for_root_directory()
-        if !empty(root_dir)
-            call setbufvar('%', 'root_dir', root_dir)
-        endif
+fu! s:change_directory(directory) abort "{{{2
+    if a:directory isnot# getcwd(winnr())
+        exe 'lcd '.fnameescape(a:directory)
     endif
-    return root_dir
 endfu
 
-fu! s:search_for_root_directory() abort "{{{2
-    for pattern in ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
-        let result = s:find_ancestor(pattern)
-        if !empty(result)
-            return result
-        endif
-    endfor
-    return ''
-endfu
 " }}}1
 " Utilities {{{1
 fu! s:is_directory(pattern) abort "{{{2
