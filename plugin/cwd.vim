@@ -123,7 +123,7 @@ fu! s:cd_root() abort "{{{1
     " outside.
     let s:fd = resolve(s:fd)
 
-    if !s:change_directory_for_buffer()
+    if !isdirectory(s:fd) && !empty(&buftype)
         return
     endif
 
@@ -139,10 +139,6 @@ fu! s:change_directory(directory) abort "{{{1
     if a:directory isnot# getcwd(winnr())
         exe 'lcd '.fnameescape(a:directory)
     endif
-endfu
-
-fu! s:change_directory_for_buffer() abort "{{{1
-    return isdirectory(s:fd) || (filereadable(s:fd) && empty(&buftype))
 endfu
 
 fu! s:find_ancestor(pattern) abort "{{{1
