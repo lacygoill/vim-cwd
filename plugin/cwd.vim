@@ -20,8 +20,9 @@ let g:loaded_cwd = 1
 " https://github.com/mattn/vim-findroot/blob/master/plugin/findroot.vim
 
 " TODO:
-" :tabedit $MYVIMRC
-" :fin * C-d
+"     :tabedit $MYVIMRC
+"     :cd ~/.vim
+"     :fin * C-d
 " Why do these suggestions use full paths?:
 "
 "         /home/user/.vim/plugged/
