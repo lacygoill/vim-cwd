@@ -50,10 +50,10 @@ if has('vim_starting') && $PWD is# $HOME
     " call timer_start(0, {-> execute('cd $HOME/.vim')})
 endif
 
-nno  <silent><unique>  d.  :<c-u>call <sid>cd_to_project_root(0)<cr>
-nno  <silent><unique>  d:  :<c-u>call <sid>cd_to_project_root(1)<cr>
+nno  <silent><unique>  d.  :<c-u>call <sid>cd_root(0)<cr>
+nno  <silent><unique>  d:  :<c-u>call <sid>cd_root(1)<cr>
 
-fu! s:cd_to_project_root(locally) abort
+fu! s:cd_root(locally) abort
     let dir = expand('%:p')
 
     let known_dirs = [
@@ -98,16 +98,12 @@ fu! s:reset_working_directory() abort
     pwd
 endfu
 
-" Command {{{1
-
-com! -bar  Cwd  call s:cd_to_project_root()
-
 " Autocmd {{{1
 
 augroup my_cwd
     au!
-    au VimEnter,BufEnter  *  Cwd
-    au BufWritePost       *  call setbufvar('%', 'rootDir', '') | Cwd
+    au VimEnter,BufEnter  *  call s:cd_root()
+    au BufWritePost       *  call setbufvar('%', 'rootDir', '') | call s:cd_root()
 augroup END
 
 " Settings {{{1
@@ -143,7 +139,7 @@ fu! Find_root_directory() abort "{{{1
     return s:root_directory()
 endfu
 
-fu! s:cd_to_project_root() abort "{{{1
+fu! s:cd_root() abort "{{{1
     let s:fd = expand('%:p')
 
     if empty(s:fd)
