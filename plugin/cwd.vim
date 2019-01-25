@@ -81,7 +81,7 @@ fu! s:get_root() abort "{{{2
 endfu
 
 fu! s:search_root() abort "{{{2
-    for pat in ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
+    for pat in ['.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
         let result = s:find_ancestor(pat)
         if !empty(result)
             return result
