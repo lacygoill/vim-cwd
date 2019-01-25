@@ -138,6 +138,9 @@ fu! s:cd_root() abort "{{{1
         let s:fd = getcwd()
     endif
 
+    " Resolve symbolic links before searching for the project root.
+    " This is useful when  editing a file within a project  from a symbolic link
+    " outside.
     let s:fd = resolve(s:fd)
 
     if !s:change_directory_for_buffer()
