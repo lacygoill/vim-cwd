@@ -111,14 +111,14 @@ augroup END
 
 let g:cwd_patterns = ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
 
-let g:cwd_targets = '/,*'
+let g:cwd_targets = ['/', '*']
 
 fu! Find_root_directory() abort "{{{1
 " For third-parties.  Not used by plugin.
     let s:fd = expand('%:p')
 
     if empty(s:fd)
-        let s:fd = getcwd()
+        let s:fd = getcwd(winnr())
     endif
 
     let s:fd = resolve(s:fd)
@@ -134,7 +134,7 @@ fu! s:cd_root() abort "{{{1
     let s:fd = expand('%:p')
 
     if empty(s:fd)
-        let s:fd = getcwd()
+        let s:fd = getcwd(winnr())
     endif
 
     " Resolve symbolic links before searching for the project root.
@@ -143,7 +143,7 @@ fu! s:cd_root() abort "{{{1
     let s:fd = resolve(s:fd)
 
     if !s:change_directory_for_buffer()
-        return
+        return ''
     endif
 
     let root_dir = s:root_directory()
@@ -161,7 +161,7 @@ fu! s:change_directory(directory) abort "{{{1
 endfu
 
 fu! s:change_directory_for_buffer() abort "{{{1
-    let patterns = split(g:cwd_targets, ',')
+    let patterns = g:cwd_targets
 
     if isdirectory(s:fd)
         return index(patterns, '/') !=# -1
