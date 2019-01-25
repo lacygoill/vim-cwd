@@ -38,72 +38,73 @@ let g:loaded_cwd = 1
 
 " Integrate this: {{{1
 
-if has('vim_starting') && $PWD is# $HOME
-    " Why a timer?{{{
-    "
-    "     $ cd
-    "     $ grep -noH pat *
-    "     $ vim -q <(!!)
-    "
-    "             The path to the matches would be prefixed with `~/.vim`, instead of `~`.
-    "}}}
-    " call timer_start(0, {-> execute('cd $HOME/.vim')})
-endif
+"     if has('vim_starting') && $PWD is# $HOME
+"         " Why a timer?{{{
+"        "
+"         "     $ cd
+"         "     $ grep -noH pat *
+"         "     $ vim -q <(!!)
+"        "
+"         "             The path to the matches would be prefixed with `~/.vim`, instead of `~`.
+"        "}}}
+"         " call timer_start(0, {-> execute('cd $HOME/.vim')})
+"     endif
 
-nno  <silent><unique>  d.  :<c-u>call <sid>cd_root(0)<cr>
-nno  <silent><unique>  d:  :<c-u>call <sid>cd_root(1)<cr>
+"     nno  <silent><unique>  d.  :<c-u>call <sid>cd_root(0)<cr>
+"     nno  <silent><unique>  d:  :<c-u>call <sid>cd_root(1)<cr>
 
-fu! s:cd_root(locally) abort
-    let dir = expand('%:p')
+"     fu! s:cd_root(locally) abort
+"         let dir = expand('%:p')
 
-    let known_dirs = [
-        \ 'autoload',
-        \ 'colors',
-        \ 'compiler',
-        \ 'doc',
-        \ 'ftdetect',
-        \ 'ftplugin',
-        \ 'indent',
-        \ 'plugin',
-        \ 'syntax',
-        \ 'CODE',
-        \ ]
+"         let known_dirs = [
+"             \ 'autoload',
+"             \ 'colors',
+"             \ 'compiler',
+"             \ 'doc',
+"             \ 'ftdetect',
+"             \ 'ftplugin',
+"             \ 'indent',
+"             \ 'plugin',
+"             \ 'syntax',
+"             \ 'CODE',
+"             \ ]
 
-    let guard = 0
-    while guard <= 100
-        let dir = fnamemodify(dir, ':h')
-        if index(known_dirs, fnamemodify(dir, ':t')) >= 0
-            let dir = fnamemodify(dir, ':h:t') is# 'after'
-                  \ ?     fnamemodify(dir, ':h:h')
-                  \ :     fnamemodify(dir, ':h')
-            break
-        endif
-        let guard += 1
-    endwhile
-    if dir isnot# '/' && isdirectory(dir)
-        exe (a:locally ? 'l' : '').'cd '.dir
-    endif
-    pwd
-endfu
+"         let guard = 0
+"         while guard <= 100
+"             let dir = fnamemodify(dir, ':h')
+"             if index(known_dirs, fnamemodify(dir, ':t')) >= 0
+"                 let dir = fnamemodify(dir, ':h:t') is# 'after'
+"                       \ ?     fnamemodify(dir, ':h:h')
+"                       \ :     fnamemodify(dir, ':h')
+"                 break
+"             endif
+"             let guard += 1
+"         endwhile
+"         if dir isnot# '/' && isdirectory(dir)
+"             exe (a:locally ? 'l' : '').'cd '.dir
+"         endif
+"         pwd
+"     endfu
 
-nno  <silent><unique>  d~  :<c-u>call <sid>reset_working_directory()<cr>
+"     nno  <silent><unique>  d~  :<c-u>call <sid>reset_working_directory()<cr>
 
-fu! s:reset_working_directory() abort
-    let orig = win_getid()
-    sil tabdo windo cd $HOME/.vim
-    call win_gotoid(orig)
-    " If the message is immediately erased, don't use a timer to fix the issue.
-    " First, try a simple `:redraw` before `:pwd`.
-    " See `:h :echo-redraw`.
-    pwd
-endfu
+"     fu! s:reset_working_directory() abort
+"         let orig = win_getid()
+"         sil tabdo windo cd $HOME/.vim
+"         call win_gotoid(orig)
+"         " If the message is immediately erased, don't use a timer to fix the issue.
+"         " First, try a simple `:redraw` before `:pwd`.
+"         " See `:h :echo-redraw`.
+"         pwd
+"     endfu
 
 " Autocmd {{{1
 
 augroup my_cwd
     au!
-    au VimEnter,BufEnter  *  call s:cd_root()
-    au BufWritePost       *  call setbufvar('%', 'rootDir', '') | call s:cd_root()
+    au BufEnter  *  call s:cd_root()
+    " au VimEnter,BufEnter  *  call s:cd_root()
+    " au BufWritePost       *  call setbufvar('%', 'rootDir', '') | call s:cd_root()
 augroup END
 
 " Settings {{{1
@@ -111,8 +112,6 @@ augroup END
 let g:cwd_patterns = ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
 
 let g:cwd_targets = '/,*'
-
-let g:cwd_change_directory_for_non_project_files = ''
 
 fu! Find_root_directory() abort "{{{1
 " For third-parties.  Not used by plugin.
@@ -149,26 +148,15 @@ fu! s:cd_root() abort "{{{1
 
     let root_dir = s:root_directory()
     if empty(root_dir)
-        " Test against 1 for backwards compatibility
-        if g:cwd_change_directory_for_non_project_files ==# 1 ||
-        \ g:cwd_change_directory_for_non_project_files is? 'current'
-            if expand('%') isnot# ''
-                call s:change_directory(fnamemodify(s:fd, ':h'))
-            endif
-        elseif g:cwd_change_directory_for_non_project_files is? 'home'
-            call s:change_directory($HOME)
-        endif
+        call s:change_directory($HOME)
     else
         call s:change_directory(root_dir)
     endif
 endfu
 
 fu! s:change_directory(directory) abort "{{{1
-    if a:directory isnot# getcwd()
+    if a:directory isnot# getcwd(winnr())
         exe 'lcd '.fnameescape(a:directory)
-        if exists('#User#CwdChDir')
-            do <nomodeline> User CwdChDir
-        endif
     endif
 endfu
 
