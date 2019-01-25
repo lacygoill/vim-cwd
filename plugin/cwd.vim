@@ -27,16 +27,12 @@ let g:loaded_cwd = 1
 
 augroup my_cwd
     au!
-    au BufEnter  *  call s:cd_root()
-    " au VimEnter,BufEnter  *  call s:cd_root()
-    " au BufWritePost       *  call setbufvar('%', 'rootDir', '') | call s:cd_root()
+    au VimEnter,BufEnter  *  call s:cd_root()
+    au BufWritePost       *  call setbufvar('%', 'rootDir', '') | call s:cd_root()
 augroup END
 
-" Settings {{{1
-
-let g:cwd_patterns = ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
-
-fu! s:cd_root() abort "{{{1
+" Interface {{{1
+fu! s:cd_root() abort "{{{2
     let s:fd = expand('%:p')
 
     if empty(s:fd)
@@ -72,25 +68,15 @@ fu! s:cd_root() abort "{{{1
         call s:change_directory(root_dir)
     endif
 endfu
-
-fu! s:root_dir_is_just_below(root_dir) abort "{{{1
-    return a:root_dir is# $HOME.'/wiki' && expand('%:p:h') isnot# $HOME.'/wiki'
-    "                                      ├──────────────────────────────────┘{{{
-    "                                      └ don't add any path component, if we're in `~/wiki/foo.md`;
-    "                                        only if we're in `~/wiki/foo/bar.md`
-    "                                        Otherwise, we would end up with:
-    "
-    "                                            let root_dir = `~/wiki/wiki`, which doesn't exist.
-    "}}}
-endfu
-
-fu! s:change_directory(directory) abort "{{{1
+" }}}1
+" Core {{{1
+fu! s:change_directory(directory) abort "{{{2
     if a:directory isnot# getcwd(winnr())
         exe 'lcd '.fnameescape(a:directory)
     endif
 endfu
 
-fu! s:find_ancestor(pattern) abort "{{{1
+fu! s:find_ancestor(pattern) abort "{{{2
     let fd_dir = isdirectory(s:fd) ? s:fd : fnamemodify(s:fd, ':h')
     let fd_dir_escaped = escape(fd_dir, ' ')
 
@@ -120,15 +106,7 @@ fu! s:find_ancestor(pattern) abort "{{{1
     endif
 endfu
 
-fu! s:is_directory(pattern) abort "{{{1
-    return stridx(a:pattern, '/') !=# -1
-endfu
-
-fu! s:is_special() abort "{{{1
-    return !isdirectory(s:fd) && !empty(&buftype)
-endfu
-
-fu! s:root_directory() abort "{{{1
+fu! s:root_directory() abort "{{{3
     let root_dir = getbufvar('%', 'rootDir')
     if empty(root_dir)
         let root_dir = s:search_for_root_directory()
@@ -139,13 +117,33 @@ fu! s:root_directory() abort "{{{1
     return root_dir
 endfu
 
-fu! s:search_for_root_directory() abort "{{{1
-    for pattern in g:cwd_patterns
+fu! s:search_for_root_directory() abort "{{{2
+    for pattern in ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
         let result = s:find_ancestor(pattern)
         if !empty(result)
             return result
         endif
     endfor
     return ''
+endfu
+" }}}1
+" Utilities {{{1
+fu! s:is_directory(pattern) abort "{{{2
+    return stridx(a:pattern, '/') !=# -1
+endfu
+
+fu! s:is_special() abort "{{{2
+    return !isdirectory(s:fd) && !empty(&buftype)
+endfu
+
+fu! s:root_dir_is_just_below(root_dir) abort "{{{2
+    return a:root_dir is# $HOME.'/wiki' && expand('%:p:h') isnot# $HOME.'/wiki'
+    "                                      ├──────────────────────────────────┘{{{
+    "                                      └ don't add any path component, if we're in `~/wiki/foo.md`;
+    "                                        only if we're in `~/wiki/foo/bar.md`
+    "                                        Otherwise, we would end up with:
+    "
+    "                                            let root_dir = `~/wiki/wiki`, which doesn't exist.
+    "}}}
 endfu
 
