@@ -138,8 +138,15 @@ fu! s:cd_root() abort "{{{1
         call s:change_directory($HOME)
     else
         " If we're in  `~/wiki/foo/bar.md`, we want the working  directory to be
-        " `~/wiki/foo`, and not `~/wiki`.
+        " `~/wiki/foo`, and not `~/wiki`. So, we may need to add a path component.
         if root_dir is# $HOME.'/wiki' && expand('%:p:h') isnot# $HOME.'/wiki'
+        "                                ├──────────────────────────────────┘{{{
+        "                                └ don't add any path component, if we're in `~/wiki/foo.md`;
+        "                                  only if we're in `~/wiki/foo/bar.md`
+        "                                  Otherwise, we would end up with:
+        "
+        "                                      let root_dir = `~/wiki/wiki`, which doesn't exist.
+        "}}}
             let root_dir .= '/'.expand('%:p:h:t')
         endif
         call s:change_directory(root_dir)
