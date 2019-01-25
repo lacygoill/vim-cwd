@@ -108,8 +108,6 @@ augroup END
 
 " Settings {{{1
 
-let g:cwd_use_lcd = 0
-
 let g:cwd_patterns = ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
 
 let g:cwd_targets = '/,*'
@@ -172,8 +170,7 @@ endfu
 
 fu! s:change_directory(directory) abort "{{{1
     if a:directory isnot# getcwd()
-        let cmd = g:cwd_use_lcd ==# 1 ? 'lcd' : 'cd'
-        exe cmd.' '.fnameescape(a:directory)
+        exe 'lcd '.fnameescape(a:directory)
         if !g:cwd_silent_chdir
             echo 'cwd: '.a:directory
         endif
