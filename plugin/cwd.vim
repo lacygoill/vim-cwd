@@ -111,8 +111,6 @@ augroup END
 
 let g:cwd_patterns = ['.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
 
-let g:cwd_targets = ['/', '.*']
-
 fu! s:cd_root() abort "{{{1
     let s:fd = expand('%:p')
 
@@ -144,15 +142,13 @@ fu! s:change_directory(directory) abort "{{{1
 endfu
 
 fu! s:change_directory_for_buffer() abort "{{{1
-    let patterns = g:cwd_targets
-
     if isdirectory(s:fd)
-        return index(patterns, '/') !=# -1
+        return 1
     endif
 
     if filereadable(s:fd) && empty(&buftype)
-        for p in patterns
-            if p isnot# '/' && s:fd =~# '.*'
+        for pat in ['/', '.*']
+            if pat isnot# '/' && s:fd =~# '.*'
                 return 1
             endif
         endfor
