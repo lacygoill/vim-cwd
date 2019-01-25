@@ -143,15 +143,8 @@ endfu
 
 fu! s:change_directory_for_buffer() abort "{{{1
     if isdirectory(s:fd)
+    \ || filereadable(s:fd) && empty(&buftype)
         return 1
-    endif
-
-    if filereadable(s:fd) && empty(&buftype)
-        for pat in ['/', '.*']
-            if pat isnot# '/' && s:fd =~# '.*'
-                return 1
-            endif
-        endfor
     endif
 
     return 0
