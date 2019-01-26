@@ -70,7 +70,8 @@ fu! s:cd_root() abort "{{{2
         " If we're in  `~/wiki/foo/bar.md`, we want the working  directory to be
         " `~/wiki/foo`, and not `~/wiki`. So, we may need to add a path component.
         if s:root_dir_is_just_below(root_dir)
-            let root_dir .= '/'.expand('%:p:h:t')
+            let dir_just_below = matchstr(expand('%:p'), '\m\C^' . root_dir . '/\zs[^/]*')
+            let root_dir .= '/' . dir_just_below
         endif
         call s:change_directory(root_dir)
     endif
