@@ -121,14 +121,22 @@ fu! s:find_root_dir(pat) abort "{{{2
 
     " `.git/`
     if s:is_directory(a:pat)
-        " If  our current  file  is  under the  directory  where  what we  found
-        " (`match`) is, the latter is the project root and we return it.
-        " Otherwise,  what we  found is  contained within  the project  root, so
-        " return its parent i.e. the project root.
+        " If our current file is under the directory where what we found (`match`) is:{{{
+        "
+        "     /path/to/.git/my/file
+        "     ├───────────┘
+        "     └ `match`
+        "
+        " We want the latter to be our project root, and so we return it.
+        "}}}
         let fd_match = fnamemodify(match, ':p:h')
-        return stridx(dir, fd_match) == 0
-            \ ?     fd_match
-            \ :     fnamemodify(match, ':p:h:h')
+        if stridx(dir, fd_match) == 0
+            return fd_match
+        " Otherwise, what we found is contained right below the project root, so
+        " we return its parent.
+        else
+            return fnamemodify(match, ':p:h:h')
+        endif
     " `Rakefile`
     else
         return fnamemodify(match, ':p:h')
