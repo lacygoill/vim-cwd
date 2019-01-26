@@ -117,7 +117,6 @@ fu! s:change_directory(directory) abort "{{{2
         exe 'lcd '.fnameescape(a:directory)
     endif
 endfu
-
 " }}}1
 " Utilities {{{1
 fu! s:is_directory(pat) abort "{{{2
