@@ -19,6 +19,18 @@ let g:loaded_cwd = 1
 " Study this plugin:
 " https://github.com/mattn/vim-findroot/blob/master/plugin/findroot.vim
 
+" Init {{{1
+
+let s:ROOT_ID = [
+    \ '.gitignore',
+    \ 'Rakefile',
+    \ '.bzr/',
+    \ '.git/',
+    \ '.hg/',
+    \ '.svn/',
+    \ '_darcs/',
+    \ ]
+
 " Autocmd {{{1
 
 augroup my_cwd
@@ -68,7 +80,7 @@ endfu
 fu! s:get_root_dir() abort "{{{2
     let root_dir = getbufvar('%', 'root_dir')
     if empty(root_dir)
-        for pat in ['.git/', '_darcs/', '.hg/', '.bzr/', '.svn/']
+        for pat in s:ROOT_ID
             let root_dir = s:find_root_dir(pat)
             if !empty(root_dir)
                 break
@@ -86,8 +98,10 @@ fu! s:find_root_dir(pat) abort "{{{2
     let dir = isdirectory(s:bufname) ? s:bufname : fnamemodify(s:bufname, ':h')
     let dir_escaped = escape(dir, ' ')
 
+    " `.git/`
     if s:is_directory(a:pat)
         let match = finddir(a:pat, dir_escaped.';')
+    " `Rakefile`
     else
         let [_suffixesadd, &suffixesadd] = [&suffixesadd, '']
         let match = findfile(a:pat, dir_escaped.';')
@@ -97,16 +111,24 @@ fu! s:find_root_dir(pat) abort "{{{2
     if empty(match)
         return ''
     endif
+    " `match` should be sth like:{{{
+    "
+    "    - /path/to/.git/
+    "    - /path/to/Rakefile
+    "    ...
+    "}}}
 
+    " `.git/`
     if s:is_directory(a:pat)
-        " If the directory we found (`match`) is  part of the file's path, it is
-        " the project root and we return it.
-        " Otherwise,  the directory  we found  is contained  within the  project
-        " root, so return its parent i.e. the project root.
+        " If  our current  file  is  under the  directory  where  what we  found
+        " (`match`) is, the latter is the project root and we return it.
+        " Otherwise,  what we  found is  contained within  the project  root, so
+        " return its parent i.e. the project root.
         let fd_match = fnamemodify(match, ':p:h')
         return stridx(dir, fd_match) == 0
             \ ?     fd_match
             \ :     fnamemodify(match, ':p:h:h')
+    " `Rakefile`
     else
         return fnamemodify(match, ':p:h')
     endif
