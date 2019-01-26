@@ -127,11 +127,35 @@ fu! s:find_root_dir(pat) abort "{{{2
         "     ├───────────┘
         "     └ `match`
         "
-        " We want the latter to be our project root, and so we return it.
+        " We don't want `/path/to` to be the root or our project.
+        " Instead we prefer `/path/to/.git`.
+        " So, we return the latter.
+        "
+        " Why?
+        " It makes  more sense. If  we're working  in a  file under  `.git/`, we
+        " probably want  our refactoring  commands to only  affect the  files in
+        " `.git/`, and not also include the files of the working tree.
         "}}}
-        let fd_match = fnamemodify(match, ':p:h')
-        if stridx(dir, fd_match) == 0
-            return fd_match
+        " Why `:p:h`?  Isn't `:p` enough?{{{
+        "
+        " `:p` will add a trailing slash, wich may interfere:
+        "
+        "                                                  v
+        "     let full_match = '~/.vim/plugged/vim-cwd/.git/'
+        "     let dir = '~/.vim/plugged/vim-cwd/.git'
+        "     echo stridx(dir, full_match)
+        "     -1~
+        "
+        " `:h` will remove this trailing slash:
+        "
+        "     let full_match = '~/.vim/plugged/vim-cwd/.git'
+        "     let dir = '~/.vim/plugged/vim-cwd/.git'
+        "     echo stridx(dir, full_match)
+        "     0~
+        "}}}
+        let full_match = fnamemodify(match, ':p')
+        if stridx(dir, full_match) == 0
+            return full_match
         " Otherwise, what we found is contained right below the project root, so
         " we return its parent.
         else
