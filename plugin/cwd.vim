@@ -83,14 +83,14 @@ fu! s:get_root_dir() abort "{{{2
 endfu
 
 fu! s:find_root_dir(pat) abort "{{{2
-    let fd_dir = isdirectory(s:bufname) ? s:bufname : fnamemodify(s:bufname, ':h')
-    let fd_dir_escaped = escape(fd_dir, ' ')
+    let dir = isdirectory(s:bufname) ? s:bufname : fnamemodify(s:bufname, ':h')
+    let dir_escaped = escape(dir, ' ')
 
     if s:is_directory(a:pat)
-        let match = finddir(a:pat, fd_dir_escaped.';')
+        let match = finddir(a:pat, dir_escaped.';')
     else
         let [_suffixesadd, &suffixesadd] = [&suffixesadd, '']
-        let match = findfile(a:pat, fd_dir_escaped.';')
+        let match = findfile(a:pat, dir_escaped.';')
         let &suffixesadd = _suffixesadd
     endif
 
@@ -104,7 +104,7 @@ fu! s:find_root_dir(pat) abort "{{{2
         " Otherwise,  the directory  we found  is contained  within the  project
         " root, so return its parent i.e. the project root.
         let fd_match = fnamemodify(match, ':p:h')
-        return stridx(fd_dir, fd_match) == 0
+        return stridx(dir, fd_match) == 0
             \ ?     fd_match
             \ :     fnamemodify(match, ':p:h:h')
     else
