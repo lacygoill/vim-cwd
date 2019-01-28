@@ -35,7 +35,7 @@ let s:ROOT_ID = [
 
 augroup my_cwd
     au!
-    au VimEnter,BufEnter  *  call s:cd_root()
+    au BufEnter * call s:cd_root()
 augroup END
 
 " Interface {{{1
