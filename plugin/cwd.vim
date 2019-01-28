@@ -40,16 +40,14 @@ augroup END
 
 " Interface {{{1
 fu! s:cd_root() abort "{{{2
-    let s:bufname = expand('%:p')
-
+    " Why `resolve()`?{{{
+    "
+    " Useful when editing a file within a project from a symbolic link outside.
+    "}}}
+    let s:bufname = resolve(expand('%:p'))
     if empty(s:bufname)
         return
     endif
-
-    " Resolve symbolic links before searching for the project root.
-    " This is useful when  editing a file within a project  from a symbolic link
-    " outside.
-    let s:bufname = resolve(s:bufname)
 
     if s:is_special()
         return
