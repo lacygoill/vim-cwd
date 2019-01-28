@@ -178,6 +178,12 @@ fu! s:is_directory(pat) abort "{{{2
 endfu
 
 fu! s:is_special() abort "{{{2
+    " Why `isdirectory()`?{{{
+    "
+    " If we're moving in the filesystem with dirvish, or a similar plugin, while
+    " working on  a project, we want  the cwd to  stay the same, and  not change
+    " every time we go up/down into a directory to see its contents.
+    "}}}
     return !empty(&buftype) && !isdirectory(s:bufname)
 endfu
 
