@@ -22,12 +22,12 @@ let g:loaded_cwd = 1
 " Init {{{1
 
 let s:ROOT_ID = [
-    \ '.gitignore',
-    \ 'Rakefile',
     \ '.bzr/',
     \ '.git/',
+    \ '.gitignore',
     \ '.hg/',
     \ '.svn/',
+    \ 'Rakefile',
     \ '_darcs/',
     \ ]
 
@@ -104,9 +104,10 @@ fu! s:find_root_dir(pat) abort "{{{2
         let match = finddir(a:pat, dir_escaped.';')
     " `Rakefile`
     else
-        let [_suffixesadd, &suffixesadd] = [&suffixesadd, '']
+        let sua_save = &suffixesadd
+        let &suffixesadd = ''
         let match = findfile(a:pat, dir_escaped.';')
-        let &suffixesadd = _suffixesadd
+        let &suffixesadd = sua_save
     endif
 
     if empty(match)
@@ -179,7 +180,7 @@ fu! s:is_directory(pat) abort "{{{2
 endfu
 
 fu! s:is_special() abort "{{{2
-    return !isdirectory(s:bufname) && !empty(&buftype)
+    return !empty(&buftype) && !isdirectory(s:bufname)
 endfu
 
 fu! s:root_dir_is_just_below(root_dir) abort "{{{2
