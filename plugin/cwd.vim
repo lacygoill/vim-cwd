@@ -189,12 +189,11 @@ endfu
 
 fu! s:root_dir_is_just_below(root_dir) abort "{{{2
     return a:root_dir is# $HOME.'/wiki' && expand('%:p:h') isnot# $HOME.'/wiki'
-    "                                      ├──────────────────────────────────┘{{{
-    "                                      └ don't add any path component, if we're in `~/wiki/foo.md`;
-    "                                        only if we're in `~/wiki/foo/bar.md`
-    "                                        Otherwise, we would end up with:
-    "
-    "                                            let root_dir = `~/wiki/wiki`, which doesn't exist.
+    "                                      ├──────────────────────────────────┘
+    "                                      └ don't add any path component, if we're in `~/wiki/foo.md`{{{
+    " Only if we're in `~/wiki/foo/bar.md`
+    " Otherwise, we would end up with `let root_dir = ~/wiki/wiki`, which
+    " doesn't exist.
     "}}}
 endfu
 
