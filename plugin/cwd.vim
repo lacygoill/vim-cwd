@@ -43,7 +43,7 @@ fu! s:cd_root() abort "{{{2
     let s:bufname = expand('%:p')
 
     if empty(s:bufname)
-        let s:bufname = getcwd(winnr())
+        return
     endif
 
     " Resolve symbolic links before searching for the project root.
