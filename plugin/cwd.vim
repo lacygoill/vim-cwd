@@ -77,7 +77,7 @@ endfu
 " }}}1
 " Core {{{1
 fu! s:get_root_dir() abort "{{{2
-    let root_dir = getbufvar('%', 'root_dir')
+    let root_dir = getbufvar('%', 'root_dir', '')
     if empty(root_dir)
         for pat in s:ROOT_MARKER
             let root_dir = s:find_root_for_this_marker(pat)
