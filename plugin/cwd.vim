@@ -21,7 +21,7 @@ let g:loaded_cwd = 1
 
 " Init {{{1
 
-let s:ROOT_ID = [
+let s:ROOT_MARKER = [
     \ '.bzr/',
     \ '.git/',
     \ '.gitignore',
@@ -79,8 +79,8 @@ endfu
 fu! s:get_root_dir() abort "{{{2
     let root_dir = getbufvar('%', 'root_dir')
     if empty(root_dir)
-        for pat in s:ROOT_ID
-            let root_dir = s:find_root_dir(pat)
+        for pat in s:ROOT_MARKER
+            let root_dir = s:find_root_for_this_marker(pat)
             if !empty(root_dir)
                 break
             endif
@@ -93,7 +93,7 @@ fu! s:get_root_dir() abort "{{{2
     return root_dir
 endfu
 
-fu! s:find_root_dir(pat) abort "{{{2
+fu! s:find_root_for_this_marker(pat) abort "{{{2
     let dir = isdirectory(s:bufname) ? s:bufname : fnamemodify(s:bufname, ':h')
     let dir_escaped = escape(dir, ' ')
 
