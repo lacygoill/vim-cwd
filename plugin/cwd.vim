@@ -120,7 +120,9 @@ fu! s:find_root_for_this_marker(pat) abort "{{{2
 
     " `.git/`
     if s:is_directory(a:pat)
-        " If our current file is under the directory where what we found (`match`) is:{{{
+        " Why `return full_match` ?{{{
+        "
+        " If our current file is under the directory where what we found (`match`) is:
         "
         "     /path/to/.git/my/file
         "     ├───────────┘
@@ -130,10 +132,10 @@ fu! s:find_root_for_this_marker(pat) abort "{{{2
         " Instead we prefer `/path/to/.git`.
         " So, we return the latter.
         "
-        " Why?
-        " It makes  more sense. If  we're working  in a  file under  `.git/`, we
-        " probably want  our refactoring  commands to only  affect the  files in
-        " `.git/`, and not also include the files of the working tree.
+        " It makes  more sense. If we're  working in  a file under  `.git/`, and
+        " we're looking for some info, we probably want our search to be limited
+        " to only the  files in `.git/`, and  not also include the  files of the
+        " working tree.
         "}}}
         " Why `:p:h`?  Isn't `:p` enough?{{{
         "
@@ -152,7 +154,7 @@ fu! s:find_root_for_this_marker(pat) abort "{{{2
         "     echo stridx(dir, full_match)
         "     0~
         "}}}
-        let full_match = fnamemodify(match, ':p')
+        let full_match = fnamemodify(match, ':p:h')
         if stridx(dir, full_match) == 0
             return full_match
         " Otherwise, what we found is contained right below the project root, so
