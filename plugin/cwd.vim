@@ -14,10 +14,7 @@ let g:loaded_cwd = 1
 "}}}
 
 " Inspiration: https://github.com/airblade/vim-rooter
-
-" TODO:
-" Study this plugin:
-" https://github.com/mattn/vim-findroot/blob/master/plugin/findroot.vim
+" Similar Plugin: https://github.com/mattn/vim-findroot/blob/master/plugin/findroot.vim
 
 " Init {{{1
 
@@ -128,7 +125,7 @@ fu! s:find_root_for_this_marker(pat) abort "{{{2
         "     ├───────────┘
         "     └ `match`
         "
-        " We don't want `/path/to` to be the root or our project.
+        " We don't want `/path/to` to be the root of our project.
         " Instead we prefer `/path/to/.git`.
         " So, we return the latter.
         "
