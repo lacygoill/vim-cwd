@@ -166,7 +166,13 @@ fu! s:find_root_for_this_marker(pat) abort "{{{2
 endfu
 
 fu! s:change_directory(directory) abort "{{{2
-    if a:directory isnot# getcwd(winnr())
+    " Why `isdirectory(a:directory)`?{{{
+    "
+    "     :sp ~/wiki/non_existing_dir/file.md
+    "     E344: Can't find directory "/home/user/wiki/non_existing_dir" in cdpath~
+    "     E472: Command failed~
+    "}}}
+    if isdirectory(a:directory) && a:directory isnot# getcwd(winnr())
         exe 'lcd '.fnameescape(a:directory)
     endif
 endfu
