@@ -66,7 +66,7 @@ fu! s:cd_root() abort "{{{2
         " `~/wiki/foo`, and not `~/wiki`. So, we may need to add a path component.
         if s:root_dir_is_just_below(root_dir)
             let dir_just_below = matchstr(expand('%:p'), '\m\C^' . root_dir . '/\zs[^/]*')
-            let root_dir .= '/' . dir_just_below
+            let root_dir ..= '/' . dir_just_below
         endif
         call s:change_directory(root_dir)
     endif
@@ -179,7 +179,7 @@ endfu
 " }}}1
 " Utilities {{{1
 fu! s:is_directory(pat) abort "{{{2
-    return stridx(a:pat, '/') !=# -1
+    return stridx(a:pat, '/') != -1
 endfu
 
 fu! s:is_special() abort "{{{2
