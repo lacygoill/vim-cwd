@@ -18,15 +18,15 @@ let g:loaded_cwd = 1
 
 " Init {{{1
 
-let s:ROOT_MARKER = [
-    \ '.bzr/',
-    \ '.git/',
-    \ '.gitignore',
-    \ '.hg/',
-    \ '.svn/',
-    \ 'Rakefile',
-    \ '_darcs/',
-    \ ]
+const s:ROOT_MARKER =<< trim END
+    .bzr/
+    .git/
+    .gitignore
+    .hg/
+    .svn/
+    Rakefile
+    _darcs/
+END
 
 " Autocmd {{{1
 
@@ -36,7 +36,7 @@ augroup my_cwd
 augroup END
 
 " Interface {{{1
-fu! s:cd_root() abort "{{{2
+fu s:cd_root() abort "{{{2
     " Why `resolve()`?{{{
     "
     " Useful when editing a file within a project from a symbolic link outside.
@@ -73,7 +73,7 @@ fu! s:cd_root() abort "{{{2
 endfu
 " }}}1
 " Core {{{1
-fu! s:get_root_dir() abort "{{{2
+fu s:get_root_dir() abort "{{{2
     let root_dir = getbufvar('%', 'root_dir', '')
     if empty(root_dir)
         for pat in s:ROOT_MARKER
@@ -90,7 +90,7 @@ fu! s:get_root_dir() abort "{{{2
     return root_dir
 endfu
 
-fu! s:find_root_for_this_marker(pat) abort "{{{2
+fu s:find_root_for_this_marker(pat) abort "{{{2
     let dir = isdirectory(s:bufname) ? s:bufname : fnamemodify(s:bufname, ':h')
     let dir_escaped = escape(dir, ' ')
 
@@ -165,7 +165,7 @@ fu! s:find_root_for_this_marker(pat) abort "{{{2
     endif
 endfu
 
-fu! s:change_directory(directory) abort "{{{2
+fu s:change_directory(directory) abort "{{{2
     " Why `isdirectory(a:directory)`?{{{
     "
     "     :sp ~/wiki/non_existing_dir/file.md
@@ -178,11 +178,11 @@ fu! s:change_directory(directory) abort "{{{2
 endfu
 " }}}1
 " Utilities {{{1
-fu! s:is_directory(pat) abort "{{{2
+fu s:is_directory(pat) abort "{{{2
     return stridx(a:pat, '/') != -1
 endfu
 
-fu! s:is_special() abort "{{{2
+fu s:is_special() abort "{{{2
     " Why `isdirectory()`?{{{
     "
     " If we're moving in the filesystem with dirvish, or a similar plugin, while
@@ -192,7 +192,7 @@ fu! s:is_special() abort "{{{2
     return !empty(&buftype) && !isdirectory(s:bufname)
 endfu
 
-fu! s:root_dir_is_just_below(root_dir) abort "{{{2
+fu s:root_dir_is_just_below(root_dir) abort "{{{2
     return a:root_dir is# $HOME.'/wiki' && expand('%:p:h') isnot# $HOME.'/wiki'
     "                                      ├──────────────────────────────────┘
     "                                      └ don't add any path component, if we're in `~/wiki/foo.md`{{{
