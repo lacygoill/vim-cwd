@@ -19,13 +19,13 @@ let g:loaded_cwd = 1
 " Init {{{1
 
 const s:ROOT_MARKER =<< trim END
-    .bzr/
-    .git/
-    .gitignore
-    .hg/
-    .svn/
-    Rakefile
-    _darcs/
+.bzr/
+.git/
+.gitignore
+.hg/
+.svn/
+Rakefile
+_darcs/
 END
 
 " Autocmd {{{1
