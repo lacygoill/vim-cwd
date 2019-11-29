@@ -42,17 +42,13 @@ fu s:cd_root() abort "{{{2
     " Useful when editing a file within a project from a symbolic link outside.
     "}}}
     let s:bufname = resolve(expand('%:p'))
-    if empty(s:bufname)
-        return
-    endif
+    if empty(s:bufname) | return | endif
 
-    if s:is_special()
-        return
-    endif
+    if s:is_special() | return | endif
 
     let root_dir = s:get_root_dir()
     if empty(root_dir)
-        " Do NOT use `$HOME` as a default root directory!{{{
+        " Do *not* use `$HOME` as a default root directory!{{{
         "
         " Vim would be stuck for too much time after pressing:
         "
@@ -60,13 +56,13 @@ fu s:cd_root() abort "{{{2
         "
         " because there are a lot of files in our home.
         "}}}
-        call s:change_directory($HOME.'/.vim')
+        call s:change_directory($HOME..'/.vim')
     else
         " If we're in  `~/wiki/foo/bar.md`, we want the working  directory to be
         " `~/wiki/foo`, and not `~/wiki`. So, we may need to add a path component.
         if s:root_dir_is_just_below(root_dir)
-            let dir_just_below = matchstr(expand('%:p'), '\m\C^' . root_dir . '/\zs[^/]*')
-            let root_dir ..= '/' . dir_just_below
+            let dir_just_below = matchstr(expand('%:p'), '^\V'..escape(root_dir, '\')..'\m/\zs[^/]*')
+            let root_dir ..= '/'..dir_just_below
         endif
         call s:change_directory(root_dir)
     endif
@@ -96,18 +92,16 @@ fu s:find_root_for_this_marker(pat) abort "{{{2
 
     " `.git/`
     if s:is_directory(a:pat)
-        let match = finddir(a:pat, dir_escaped.';')
+        let match = finddir(a:pat, dir_escaped..';')
     " `Rakefile`
     else
         let sua_save = &suffixesadd
         let &suffixesadd = ''
-        let match = findfile(a:pat, dir_escaped.';')
+        let match = findfile(a:pat, dir_escaped..';')
         let &suffixesadd = sua_save
     endif
 
-    if empty(match)
-        return ''
-    endif
+    if empty(match) | return '' | endif
     " `match` should be sth like:{{{
     "
     "    - /path/to/.git/
@@ -173,7 +167,7 @@ fu s:change_directory(directory) abort "{{{2
     "     E472: Command failed~
     "}}}
     if isdirectory(a:directory) && a:directory isnot# getcwd(winnr())
-        exe 'lcd '.fnameescape(a:directory)
+        exe 'lcd '..fnameescape(a:directory)
     endif
 endfu
 " }}}1
@@ -189,13 +183,13 @@ fu s:is_special() abort "{{{2
     " working on  a project, we want  the cwd to  stay the same, and  not change
     " every time we go up/down into a directory to see its contents.
     "}}}
-    return !empty(&buftype) && !isdirectory(s:bufname)
+    return !empty(&bt) && !isdirectory(s:bufname)
 endfu
 
 fu s:root_dir_is_just_below(root_dir) abort "{{{2
-    return a:root_dir is# $HOME.'/wiki' && expand('%:p:h') isnot# $HOME.'/wiki'
-    "                                      ├──────────────────────────────────┘
-    "                                      └ don't add any path component, if we're in `~/wiki/foo.md`{{{
+    return a:root_dir is# $HOME..'/wiki' && expand('%:p:h') isnot# $HOME..'/wiki'
+    "                                       ├───────────────────────────────────┘
+    "                                       └ don't add any path component, if we're in `~/wiki/foo.md`{{{
     " Only if we're in `~/wiki/foo/bar.md`
     " Otherwise, we would end up with `let root_dir = ~/wiki/wiki`, which
     " doesn't exist.
