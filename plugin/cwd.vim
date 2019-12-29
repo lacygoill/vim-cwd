@@ -32,7 +32,8 @@ END
 
 augroup my_cwd
     au!
-    au BufEnter * call s:cd_root()
+    " `++nested` because: https://github.com/airblade/vim-rooter/commit/eef98131fef264d0f4e4f95c42e0de476c78009c
+    au BufEnter * ++nested call s:cd_root()
 augroup END
 
 " Interface {{{1
@@ -173,7 +174,7 @@ endfu
 " }}}1
 " Utilities {{{1
 fu s:is_directory(pat) abort "{{{2
-    return stridx(a:pat, '/') != -1
+    return a:pat[-1:-1] is# '/'
 endfu
 
 fu s:is_special() abort "{{{2
