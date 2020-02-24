@@ -28,6 +28,20 @@ const s:ROOT_MARKER =<< trim END
     _darcs/
 END
 
+const s:WHITELIST =<< trim END
+    awk
+    c
+    css
+    html
+    lua
+    python
+    sed
+    sh
+    tex
+    vim
+    zsh
+END
+
 " Autocmd {{{1
 
 augroup my_cwd
@@ -38,6 +52,19 @@ augroup END
 
 " Interface {{{1
 fu s:cd_root() abort "{{{2
+    " Changing the cwd automatically can lead to hard-to-debug issues.{{{
+    "
+    " It  only  makes sense  when  we're  working on  some  project  in a  known
+    " programming language.
+    "
+    " In the  past, we had  several issues because we  changed the cwd  where it
+    " didn't make sense; e.g.: https://github.com/justinmk/vim-dirvish/issues/168
+    " Another issue was in an unexpected output of ``expand('`shell cmd`')``.
+    "
+    " I'm tired of finding bugs which no one else finds/can reproduce...
+    "}}}
+    if s:should_be_ignored() | return | endif
+
     " Why `resolve()`?{{{
     "
     " Useful when editing a file within a project from a symbolic link outside.
@@ -173,6 +200,19 @@ fu s:change_directory(directory) abort "{{{2
 endfu
 " }}}1
 " Utilities {{{1
+fu s:should_be_ignored() abort "{{{2
+    " Alternatively, you could use a blacklist, which by defintion would be more permissive.{{{
+    "
+    " Something like that:
+    "
+    "     return index(s:BLACKLIST, &ft) != -1 || &bt isnot# ''
+    "
+    " In the blacklist, you'll want at least an empty string (for empty filetype),
+    " as well as a string containing `git` (and one containing `gitcommit`).
+    "}}}
+    return index(s:WHITELIST, &ft) == -1 || &bt isnot# ''
+endfu
+
 fu s:is_directory(pat) abort "{{{2
     return a:pat[-1:-1] is# '/'
 endfu
