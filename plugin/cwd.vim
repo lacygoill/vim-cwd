@@ -28,18 +28,10 @@ const s:ROOT_MARKER =<< trim END
     _darcs/
 END
 
-const s:WHITELIST =<< trim END
-    awk
-    c
-    css
-    html
-    lua
-    python
-    sed
-    sh
-    tex
-    vim
-    zsh
+const s:BLACKLIST =<< trim END
+
+    git
+    gitcommit
 END
 
 " Autocmd {{{1
@@ -69,7 +61,7 @@ fu s:cd_root() abort "{{{2
     "
     " Useful when editing a file within a project from a symbolic link outside.
     "}}}
-    let s:bufname = resolve(expand('%:p'))
+    let s:bufname = resolve(expand('<afile>:p'))
     if empty(s:bufname) | return | endif
 
     if s:is_special() | return | endif
@@ -89,7 +81,7 @@ fu s:cd_root() abort "{{{2
         " If we're in  `~/wiki/foo/bar.md`, we want the working  directory to be
         " `~/wiki/foo`, and not `~/wiki`. So, we may need to add a path component.
         if s:root_dir_is_just_below(root_dir)
-            let dir_just_below = matchstr(expand('%:p'), '^\V'..escape(root_dir, '\')..'\m/\zs[^/]*')
+            let dir_just_below = matchstr(expand('<afile>:p'), '^\V'..escape(root_dir, '\')..'\m/\zs[^/]*')
             let root_dir ..= '/'..dir_just_below
         endif
         call s:change_directory(root_dir)
@@ -201,16 +193,106 @@ endfu
 " }}}1
 " Utilities {{{1
 fu s:should_be_ignored() abort "{{{2
-    " Alternatively, you could use a blacklist, which by defintion would be more permissive.{{{
+    " Alternatively, you could use a whitelist, which by definition would be more restrictive.{{{
     "
     " Something like that:
     "
-    "     return index(s:BLACKLIST, &ft) != -1 || &bt isnot# ''
-    "
-    " In the blacklist, you'll want at least an empty string (for empty filetype),
-    " as well as a string containing `git` (and one containing `gitcommit`).
+    "     return index(s:WHITELIST, &ft) == -1 || ...
     "}}}
-    return index(s:WHITELIST, &ft) == -1 || &bt isnot# ''
+    " Why the `filereadable()` condition?{{{
+    "
+    " If we're editing  a new file, we don't want  any discrepancy between Vim's
+    " cwd  and the  shell's one.   Otherwise,  Vim could  write the  file in  an
+    " unexpected location:
+    "
+    "     $ cd /tmp
+    "     $ vim x/y.vim
+    "     :echo expand('%:p')
+    "     x/y.vim~
+    "     :w
+    "     :echo expand('%:p')
+    "     ~/.vim/x/y.vim~
+    "     " this is wrong; I would expect the new file to be written in `/tmp/x/y.vim`
+    "
+    " Here's what happens.
+    " When we enter the buffer, `vim-cwd` resets Vim's cwd from `/tmp` to `~/.vim`.
+    " Then, before writing the buffer, a custom autocmd in our vimrc runs this:
+    "
+    "     :call mkdir(fnamemodify('x/y.vim', ':h'))
+    "     ⇔
+    "     :call mkdir('x')
+    "     ⇔
+    "     " create directory `getcwd()..'/x'`
+    "     ⇔
+    "     " create directory `~/.vim/x`
+    "
+    " Finally, Vim writes the file `~/.vim/x/y.vim`.
+    "
+    " ---
+    "
+    " You may wonder why this issue affects `$ vim x/y.vim`, but not `$ vim y.vim`.
+    " Watch this:
+    "
+    "     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a /tmp/b && cd /tmp/a
+    "     $ vim -Nu NONE +'cd /tmp/b' x/y
+    "     :w
+    "     E212~
+    "     :call mkdir('/tmp/b/x')
+    "     :w
+    "     :echo expand('%:p')
+    "     /tmp/b/x/y~
+    "          ^
+    "
+    "     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a /tmp/b && cd /tmp/a
+    "     $ vim -Nu NONE +'cd /tmp/b' y
+    "     :w
+    "     /tmp/a/y~
+    "          ^
+    "
+    "     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a/x /tmp/b/x && cd /tmp/a
+    "     $ vim -Nu NONE +'cd /tmp/b' x/y
+    "     :w
+    "     /tmp/a/x/y~
+    "          ^
+    "
+    "     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a/x /tmp/b/x && cd /tmp/a
+    "     $ vim -Nu NONE +'cd /tmp/b' y
+    "     :w
+    "     /tmp/a/y~
+    "          ^
+    "
+    " It seems that most  of the time, Vim writes a file  (with a relative path)
+    " in the cwd of the *shell*.  Except on one occasion; when:
+    "
+    "    - the file path contains a slash
+    "    - there is no subdirectory in the shell's cwd matching the file's parent directory
+    "
+    " In that case, Vim writes the file in its *own* cwd.
+    "
+    " Note that changing  `+` with `--cmd` changes the name  of the buffer (from
+    " relative to absolute), but it doesn't  change the file where the buffer is
+    " written.
+    "
+    " ---
+    "
+    " What about a file path provided via `:e` instead of the shell's command-line?
+    " In that case,  it seems that Vim always  uses its own cwd, at  the time of
+    " the first successful writing of the buffer.
+    "
+    "     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a /tmp/b
+    "     $ cd /tmp
+    "     $ vim -Nu NONE
+    "     :cd /tmp/a
+    "     :e x/y
+    "     :w
+    "     E212~
+    "     :cd /tmp/b
+    "     :call mkdir('/tmp/b/x')
+    "     :w
+    "     /tmp/b/x/y~
+    "          ^
+    "}}}
+    return index(s:BLACKLIST, &ft) != -1 || &bt isnot# '' || !filereadable(expand('<afile>:p'))
 endfu
 
 fu s:is_directory(pat) abort "{{{2
@@ -228,8 +310,8 @@ fu s:is_special() abort "{{{2
 endfu
 
 fu s:root_dir_is_just_below(root_dir) abort "{{{2
-    return a:root_dir is# $HOME..'/wiki' && expand('%:p:h') isnot# $HOME..'/wiki'
-    "                                       ├───────────────────────────────────┘
+    return a:root_dir is# $HOME..'/wiki' && expand('<afile>:p:h') isnot# $HOME..'/wiki'
+    "                                       ├─────────────────────────────────────────┘
     "                                       └ don't add any path component, if we're in `~/wiki/foo.md`{{{
     " Only if we're in `~/wiki/foo/bar.md`
     " Otherwise, we would end up with `let root_dir = ~/wiki/wiki`, which
