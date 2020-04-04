@@ -3,16 +3,6 @@ if exists('g:loaded_cwd')
 endif
 let g:loaded_cwd = 1
 
-" Read This:{{{
-"
-" The concept of working directory is local to a window.
-"
-" `:pwd` and `getcwd()`  give the local working directory if  there's one in the
-" current window, or the global one otherwise
-"
-" `getcwd(-1)` gives the global directory, and `getcwd(winnr())` the local one.
-"}}}
-
 " Inspiration: https://github.com/airblade/vim-rooter
 " Similar Plugin: https://github.com/mattn/vim-findroot/blob/master/plugin/findroot.vim
 
