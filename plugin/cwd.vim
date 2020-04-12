@@ -58,15 +58,27 @@ fu s:cd_root() abort "{{{2
 
     let root_dir = s:get_root_dir()
     if empty(root_dir)
-        " Do *not* use `$HOME` as a default root directory!{{{
+        " Why this guard?{{{
         "
-        " Vim would be stuck for too much time after pressing:
+        "     $ cd /tmp; echo ''>r.vim; vim -S r.vim /tmp/r.vim
+        "     Error detected while processing command line:~
+        "     E484: Can't open file r.vim~
         "
-        "     :fin * C-d
-        "
-        " because there are a lot of files in our home.
+        " More generally, any relative file path used in a `+''` command will be
+        " completed with Vim's cwd.  If the latter is different than the shell's
+        " cwd, this will lead to unexpected results.
         "}}}
-        call s:change_directory($HOME..'/.vim')
+        if !has('vim_starting')
+            " Do *not* use `$HOME` as a default root directory!{{{
+            "
+            " Vim would be stuck for too much time after pressing:
+            "
+            "     :fin * C-d
+            "
+            " because there are a lot of files in our home.
+            "}}}
+            call s:set_cwd($HOME..'/.vim')
+        endif
     else
         " If we're in  `~/wiki/foo/bar.md`, we want the working  directory to be
         " `~/wiki/foo`, and not `~/wiki`. So, we may need to add a path component.
@@ -74,7 +86,7 @@ fu s:cd_root() abort "{{{2
             let dir_just_below = matchstr(expand('<afile>:p'), '^\V'..escape(root_dir, '\')..'\m/\zs[^/]*')
             let root_dir ..= '/'..dir_just_below
         endif
-        call s:change_directory(root_dir)
+        call s:set_cwd(root_dir)
     endif
 endfu
 " }}}1
@@ -169,7 +181,7 @@ fu s:find_root_for_this_marker(pat) abort "{{{2
     endif
 endfu
 
-fu s:change_directory(directory) abort "{{{2
+fu s:set_cwd(directory) abort "{{{2
     " Why `isdirectory(a:directory)`?{{{
     "
     "     :sp ~/wiki/non_existing_dir/file.md
