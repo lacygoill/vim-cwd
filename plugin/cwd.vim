@@ -26,8 +26,7 @@ END
 
 " Autocmd {{{1
 
-augroup my_cwd
-    au!
+augroup my_cwd | au!
     " `++nested` because: https://github.com/airblade/vim-rooter/commit/eef98131fef264d0f4e4f95c42e0de476c78009c
     au BufEnter * ++nested call s:cd_root()
 augroup END
