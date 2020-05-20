@@ -80,8 +80,8 @@ fu s:cd_root() abort "{{{2
         endif
     else
         " If we're in  `~/wiki/foo/bar.md`, we want the working  directory to be
-        " `~/wiki/foo`, and not `~/wiki`. So, we may need to add a path component.
-        if s:root_dir_is_just_below(root_dir)
+        " `~/wiki/foo`, and not `~/wiki`.  So, we may need to add a path component.
+        if s:in_wiki(root_dir)
             let dir_just_below = matchstr(expand('<afile>:p'), '^\V'..escape(root_dir, '\')..'\m/\zs[^/]*')
             let root_dir ..= '/'..dir_just_below
         endif
@@ -310,7 +310,7 @@ fu s:is_special() abort "{{{2
     return !empty(&bt) && !isdirectory(s:bufname)
 endfu
 
-fu s:root_dir_is_just_below(root_dir) abort "{{{2
+fu s:in_wiki(root_dir) abort "{{{2
     return a:root_dir is# $HOME..'/wiki' && expand('<afile>:p:h') isnot# $HOME..'/wiki'
     "                                       ├─────────────────────────────────────────┘
     "                                       └ don't add any path component, if we're in `~/wiki/foo.md`{{{
