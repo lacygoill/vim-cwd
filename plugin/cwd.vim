@@ -50,7 +50,7 @@ fu s:cd_root() abort "{{{2
     "
     " Useful when editing a file within a project from a symbolic link outside.
     "}}}
-    let s:bufname = resolve(expand('<afile>:p'))
+    let s:bufname = expand('<afile>:p')->resolve()
     if empty(s:bufname) | return | endif
 
     if s:is_special() | return | endif
@@ -76,14 +76,15 @@ fu s:cd_root() abort "{{{2
             "
             " because there are a lot of files in our home.
             "}}}
-            call s:set_cwd($HOME..'/.vim')
+            call s:set_cwd($HOME .. '/.vim')
         endif
     else
         " If we're in  `~/wiki/foo/bar.md`, we want the working  directory to be
         " `~/wiki/foo`, and not `~/wiki`.  So, we may need to add a path component.
         if s:in_wiki(root_dir)
-            let dir_just_below = matchstr(expand('<afile>:p'), '^\V'..escape(root_dir, '\')..'\m/\zs[^/]*')
-            let root_dir ..= '/'..dir_just_below
+            let dir_just_below = expand('<afile>:p')
+                \ ->matchstr('^\V' .. escape(root_dir, '\') .. '\m/\zs[^/]*')
+            let root_dir ..= '/' .. dir_just_below
         endif
         call s:set_cwd(root_dir)
     endif
@@ -113,12 +114,12 @@ fu s:find_root_for_this_marker(pat) abort "{{{2
 
     " `.git/`
     if s:is_directory(a:pat)
-        let match = finddir(a:pat, dir_escaped..';')
+        let match = finddir(a:pat, dir_escaped .. ';')
     " `Rakefile`
     else
         let sua_save = &suffixesadd
         let &suffixesadd = ''
-        let match = findfile(a:pat, dir_escaped..';')
+        let match = findfile(a:pat, dir_escaped .. ';')
         let &suffixesadd = sua_save
     endif
 
@@ -144,7 +145,7 @@ fu s:find_root_for_this_marker(pat) abort "{{{2
         " Instead we prefer `/path/to/.git`.
         " So, we return the latter.
         "
-        " It makes  more sense. If we're  working in  a file under  `.git/`, and
+        " It makes  more sense.  If we're  working in a file  under `.git/`, and
         " we're looking for some info, we probably want our search to be limited
         " to only the  files in `.git/`, and  not also include the  files of the
         " working tree.
@@ -187,8 +188,8 @@ fu s:set_cwd(directory) abort "{{{2
     "     E344: Can't find directory "/home/user/wiki/non_existing_dir" in cdpath~
     "     E472: Command failed~
     "}}}
-    if isdirectory(a:directory) && a:directory isnot# getcwd(winnr())
-        exe 'lcd '..fnameescape(a:directory)
+    if isdirectory(a:directory) && a:directory isnot# winnr()->getcwd()
+        exe 'lcd ' .. fnameescape(a:directory)
     endif
 endfu
 " }}}1
@@ -219,11 +220,11 @@ fu s:should_be_ignored() abort "{{{2
     " When we enter the buffer, `vim-cwd` resets Vim's cwd from `/tmp` to `~/.vim`.
     " Then, before writing the buffer, a custom autocmd in our vimrc runs this:
     "
-    "     :call mkdir(fnamemodify('x/y.vim', ':h'))
+    "     :call fnamemodify('x/y.vim', ':h')->mkdir()
     "     ⇔
     "     :call mkdir('x')
     "     ⇔
-    "     " create directory `getcwd()..'/x'`
+    "     " create directory `getcwd() .. '/x'`
     "     ⇔
     "     " create directory `~/.vim/x`
     "
@@ -293,7 +294,7 @@ fu s:should_be_ignored() abort "{{{2
     "     /tmp/b/x/y~
     "          ^
     "}}}
-    return index(s:BLACKLIST, &ft) != -1 || &bt isnot# '' || !filereadable(expand('<afile>:p'))
+    return index(s:BLACKLIST, &ft) != -1 || &bt != '' || !expand('<afile>:p')->filereadable()
 endfu
 
 fu s:is_directory(pat) abort "{{{2
@@ -311,9 +312,9 @@ fu s:is_special() abort "{{{2
 endfu
 
 fu s:in_wiki(root_dir) abort "{{{2
-    return a:root_dir is# $HOME..'/wiki' && expand('<afile>:p:h') isnot# $HOME..'/wiki'
-    "                                       ├─────────────────────────────────────────┘
-    "                                       └ don't add any path component, if we're in `~/wiki/foo.md`{{{
+    return a:root_dir is# $HOME .. '/wiki' && expand('<afile>:p:h') isnot# $HOME .. '/wiki'
+    "                                         ├───────────────────────────────────────────┘
+    "                                         └ don't add any path component, if we're in `~/wiki/foo.md`{{{
     " Only if we're in `~/wiki/foo/bar.md`
     " Otherwise, we would end up with `let root_dir = ~/wiki/wiki`, which
     " doesn't exist.
