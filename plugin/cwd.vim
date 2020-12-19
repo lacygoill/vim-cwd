@@ -44,16 +44,22 @@ fu s:cd_root() abort "{{{2
     "
     " I'm tired of finding bugs which no one else finds/can reproduce...
     "}}}
-    if s:should_be_ignored() | return | endif
+    if s:should_be_ignored()
+        return
+    endif
 
     " Why `resolve()`?{{{
     "
     " Useful when editing a file within a project from a symbolic link outside.
     "}}}
     let s:bufname = expand('<afile>:p')->resolve()
-    if empty(s:bufname) | return | endif
+    if empty(s:bufname)
+        return
+    endif
 
-    if s:is_special() | return | endif
+    if s:is_special()
+        return
+    endif
 
     let root_dir = s:get_root_dir()
     if empty(root_dir)
