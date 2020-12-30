@@ -304,7 +304,7 @@ fu s:should_be_ignored() abort "{{{2
 endfu
 
 fu s:is_directory(pat) abort "{{{2
-    return a:pat[-1:-1] is# '/'
+    return a:pat[-1 : -1] is# '/'
 endfu
 
 fu s:is_special() abort "{{{2
