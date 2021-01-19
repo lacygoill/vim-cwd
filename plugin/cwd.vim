@@ -209,7 +209,7 @@ def ShouldBeIgnored(): bool #{{{2
     #
     # Something like that:
     #
-    #     return index(s:WHITELIST, &ft) == -1 || ...
+    #     return index(WHITELIST, &ft) == -1 || ...
     #}}}
     # Why the `filereadable()` condition?{{{
     #
