@@ -304,7 +304,7 @@ def ShouldBeIgnored(): bool #{{{2
     #     /tmp/b/x/y~
     #          ^
     #}}}
-    return index(BLACKLIST, &ft) != -1
+    return index(BLACKLIST, &ft) >= 0
         || &bt != ''
         || !expand('<afile>:p')->filereadable()
 enddef
