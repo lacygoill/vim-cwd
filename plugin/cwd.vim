@@ -89,7 +89,7 @@ def CdRoot() #{{{2
         # `~/wiki/foo`, and not `~/wiki`.  So, we may need to add a path component.
         if InWiki(root_dir)
             var dir_just_below: string = expand('<afile>:p')
-                ->matchstr('^\V' .. escape(root_dir, '\') .. '\m/\zs[^/]*')
+                ->matchstr('^\V' .. escape(root_dir, '\') .. '\m' .. '/\zs[^/]*')
             root_dir ..= '/' .. dir_just_below
         endif
         SetCwd(root_dir)
