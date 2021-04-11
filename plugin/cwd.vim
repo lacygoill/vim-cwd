@@ -6,7 +6,7 @@ var loaded = true
 # Inspiration: https://github.com/airblade/vim-rooter
 # Similar Plugin: https://github.com/mattn/vim-findroot/blob/master/plugin/findroot.vim
 
-# Init {{{1
+# Config {{{1
 
 const ROOT_MARKER: list<string> =<< trim END
     .bzr/
@@ -24,11 +24,15 @@ const BLACKLIST: list<string> =<< trim END
     gitcommit
 END
 
+# Declarations {{{1
+
+var bufname: string
+
 # Autocmd {{{1
 
 augroup MyCwd | au!
     # `++nested` because: https://github.com/airblade/vim-rooter/commit/eef98131fef264d0f4e4f95c42e0de476c78009c
-    au BufEnter * ++nested CdRoot()
+    au BufReadPost * ++nested CdRoot()
 augroup END
 
 # Interface {{{1
@@ -61,8 +65,8 @@ def CdRoot() #{{{2
         return
     endif
 
-    var root_dir: string = GetRootDir()
-    if empty(root_dir)
+    var project_root: string = GetRootDir()
+    if empty(project_root)
         # Why this guard?{{{
         #
         #     $ cd /tmp; echo ''>r.vim; vim -S r.vim /tmp/r.vim
@@ -86,33 +90,32 @@ def CdRoot() #{{{2
         endif
     else
         # If we're in  `~/wiki/foo/bar.md`, we want the working  directory to be
-        # `~/wiki/foo`, and not `~/wiki`.  So, we may need to add a path component.
-        if InWiki(root_dir)
+        # `~/wiki/foo`, and not `~/wiki`.  So, we might need to add a path component.
+        if InSubWiki(project_root)
             var dir_just_below: string = expand('<afile>:p')
-                ->matchstr('^\V' .. escape(root_dir, '\') .. '\m' .. '/\zs[^/]*')
-            root_dir ..= '/' .. dir_just_below
+                ->matchstr('^\V' .. escape(project_root, '\') .. '\m' .. '/\zs[^/]*')
+            project_root ..= '/' .. dir_just_below
         endif
-        SetCwd(root_dir)
+        SetCwd(project_root)
     endif
 enddef
-var bufname: string
 # }}}1
 # Core {{{1
 def GetRootDir(): string #{{{2
-    var root_dir: string = getbufvar('%', 'root_dir', '')
-    if empty(root_dir)
+    var project_root: string = getbufvar('%', 'project_root', '')
+    if empty(project_root)
         for pat in ROOT_MARKER
-            root_dir = FindRootForThisMarker(pat)
-            if !empty(root_dir)
+            project_root = FindRootForThisMarker(pat)
+            if !empty(project_root)
                 break
             endif
         endfor
-        if !empty(root_dir)
+        if !empty(project_root)
             # cache the result
-            setbufvar('%', 'root_dir', root_dir)
+            setbufvar('%', 'project_root', project_root)
         endif
     endif
-    return root_dir
+    return project_root
 enddef
 
 def FindRootForThisMarker(pat: string): string #{{{2
@@ -323,13 +326,10 @@ def IsSpecial(): bool #{{{2
     return !empty(&bt) && !isdirectory(bufname)
 enddef
 
-def InWiki(root_dir: string): bool #{{{2
-    return root_dir == $HOME .. '/wiki' && expand('<afile>:p:h') != $HOME .. '/wiki'
-    #                                      ├───────────────────────────────────────┘
-    #                                      └ don't add any path component, if we're in `~/wiki/foo.md`{{{
-    # Only if we're in `~/wiki/foo/bar.md`
-    # Otherwise, we would end up with `let root_dir = ~/wiki/wiki`, which
-    # doesn't exist.
-    #}}}
+def InSubWiki(project_root: string): bool #{{{2
+# A sub wiki is sth like `~/wiki/some_subject/`.
+    return project_root == $HOME .. '/wiki'
+        # `~/wiki/` itself is not a subwiki.
+        && expand('<afile>:p:h') != $HOME .. '/wiki'
 enddef
 
