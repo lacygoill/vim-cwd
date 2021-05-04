@@ -28,11 +28,24 @@ END
 
 var bufname: string
 
+import CWD_CACHE from 'cwd.vim'
+
 # Autocmd {{{1
 
 augroup MyCwd | au!
     # `++nested` because: https://github.com/airblade/vim-rooter/commit/eef98131fef264d0f4e4f95c42e0de476c78009c
-    au BufReadPost * ++nested CdRoot()
+    # `BufReadPost` is not frequent enough.{{{
+    #
+    # For example,  if – for  some reason –  the cwd has  been wrongly set  in a
+    # window, after saving/restoring  a session, it remains  wrong.  Our autocmd
+    # should fix this automatically.
+    #
+    # ---
+    #
+    # If you notice other cases where  the cwd has not been correctly set/fixed,
+    # just listen to `BufEnter`.
+    #}}}
+    au BufWinEnter * ++nested CdRoot()
 augroup END
 
 # Interface {{{1
@@ -102,7 +115,7 @@ enddef
 # }}}1
 # Core {{{1
 def GetRootDir(): string #{{{2
-    var project_root: string = getbufvar('%', 'project_root', '')
+    var project_root: string = getbufvar('%', CWD_CACHE, '')
     if empty(project_root)
         for pat in ROOT_MARKER
             project_root = FindRootForThisMarker(pat)
@@ -112,14 +125,14 @@ def GetRootDir(): string #{{{2
         endfor
         if !empty(project_root)
             # cache the result
-            setbufvar('%', 'project_root', project_root)
+            setbufvar('%', CWD_CACHE, project_root)
         endif
     endif
     return project_root
 enddef
 
 def FindRootForThisMarker(pat: string): string #{{{2
-    var dir: string = isdirectory(bufname) ? bufname : fnamemodify(bufname, ':h')
+    var dir: string = isdirectory(bufname) ? bufname : bufname->fnamemodify(':h')
     var dir_escaped: string = escape(dir, ' ')
 
     var match: string
@@ -167,30 +180,30 @@ def FindRootForThisMarker(pat: string): string #{{{2
         #
         # `:p` will add a trailing slash, wich may interfere:
         #
-        #                                                          v
-        #     var full_match: string = '~/.vim/plugged/vim-cwd/.git/'
-        #     var dir: string = '~/.vim/plugged/vim-cwd/.git'
+        #                                                            v
+        #     var full_match: string = '~/.vim/pack/mine/opt/cwd/.git/'
+        #     var dir: string = '~/.vim/pack/mine/opt/cwd/.git'
         #     echo stridx(dir, full_match)
         #     -1~
         #
         # `:h` will remove this trailing slash:
         #
-        #     var full_match: string = '~/.vim/plugged/vim-cwd/.git'
-        #     var dir: string = '~/.vim/plugged/vim-cwd/.git'
+        #     var full_match: string = '~/.vim/pack/mine/opt/cwd/.git'
+        #     var dir: string = '~/.vim/pack/mine/opt/cwd/.git'
         #     echo stridx(dir, full_match)
         #     0~
         #}}}
-        var full_match: string = fnamemodify(match, ':p:h')
+        var full_match: string = match->fnamemodify(':p:h')
         if stridx(dir, full_match) == 0
             return full_match
         # Otherwise, what we found is contained right below the project root, so
         # we return its parent.
         else
-            return fnamemodify(match, ':p:h:h')
+            return match->fnamemodify(':p:h:h')
         endif
     # `Rakefile`
     else
-        return fnamemodify(match, ':p:h')
+        return match->fnamemodify(':p:h')
     endif
 enddef
 
@@ -212,7 +225,7 @@ def ShouldBeIgnored(): bool #{{{2
     #
     # Something like that:
     #
-    #     return index(WHITELIST, &ft) == -1 || ...
+    #     return index(WHITELIST, &filetype) == -1 || ...
     #}}}
     # Why the `filereadable()` condition?{{{
     #
@@ -307,8 +320,8 @@ def ShouldBeIgnored(): bool #{{{2
     #     /tmp/b/x/y~
     #          ^
     #}}}
-    return index(BLACKLIST, &ft) >= 0
-        || &bt != ''
+    return index(BLACKLIST, &filetype) >= 0
+        || &buftype != ''
         || !expand('<afile>:p')->filereadable()
 enddef
 
@@ -323,7 +336,7 @@ def IsSpecial(): bool #{{{2
     # working on  a project, we want  the cwd to  stay the same, and  not change
     # every time we go up/down into a directory to see its contents.
     #}}}
-    return !empty(&bt) && !isdirectory(bufname)
+    return !empty(&buftype) && !isdirectory(bufname)
 enddef
 
 def InSubWiki(project_root: string): bool #{{{2
