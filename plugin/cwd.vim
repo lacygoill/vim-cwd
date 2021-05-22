@@ -28,7 +28,7 @@ END
 
 var bufname: string
 
-import CWD_CACHE from 'cwd.vim'
+import REPO_ROOT from 'cwd.vim'
 
 # Autocmd {{{1
 
@@ -52,7 +52,7 @@ augroup END
 def CdRoot() #{{{2
     # Changing the cwd automatically can lead to hard-to-debug issues.{{{
     #
-    # It  only  makes sense  when  we're  working on  some  project  in a  known
+    # It  only makes  sense when  we're working  on some  repository in  a known
     # programming language.
     #
     # In the  past, we had  several issues because we  changed the cwd  where it
@@ -67,7 +67,7 @@ def CdRoot() #{{{2
 
     # Why `resolve()`?{{{
     #
-    # Useful when editing a file within a project from a symbolic link outside.
+    # Useful when editing a file within a repository from a symbolic link outside.
     #}}}
     bufname = expand('<afile>:p')->resolve()
     if empty(bufname)
@@ -78,8 +78,8 @@ def CdRoot() #{{{2
         return
     endif
 
-    var project_root: string = GetRootDir()
-    if empty(project_root)
+    var repo_root: string = GetRootDir()
+    if empty(repo_root)
         # Why this guard?{{{
         #
         #     $ cd /tmp; echo ''>r.vim; vim -S r.vim /tmp/r.vim
@@ -104,40 +104,44 @@ def CdRoot() #{{{2
     else
         # If we're in  `~/wiki/foo/bar.md`, we want the working  directory to be
         # `~/wiki/foo`, and not `~/wiki`.  So, we might need to add a path component.
-        if InSubWiki(project_root)
+        if InSubWiki(repo_root)
             var dir_just_below: string = expand('<afile>:p')
-                ->matchstr('^\V' .. escape(project_root, '\') .. '\m' .. '/\zs[^/]*')
-            project_root ..= '/' .. dir_just_below
+                ->matchstr('^\V' .. escape(repo_root, '\') .. '\m' .. '/\zs[^/]*')
+            repo_root ..= '/' .. dir_just_below
         endif
-        SetCwd(project_root)
+        SetCwd(repo_root)
     endif
 enddef
 # }}}1
 # Core {{{1
 def GetRootDir(): string #{{{2
-    var project_root: string = getbufvar('%', CWD_CACHE, '')
-    if empty(project_root)
+    var repo_root: string = getbufvar('%', REPO_ROOT, '')
+    if empty(repo_root)
         for pat in ROOT_MARKER
-            project_root = FindRootForThisMarker(pat)
-            if !empty(project_root)
+            repo_root = FindRootForThisMarker(pat)
+            if !empty(repo_root)
                 break
             endif
         endfor
-        if !empty(project_root)
+        if !empty(repo_root)
             # cache the result
-            setbufvar('%', CWD_CACHE, project_root)
+            setbufvar('%', REPO_ROOT, repo_root)
+            # we need to fire this event for `vim-indent`
+            if exists('#User#RepoRootIsCached')
+                doautocmd <nomodeline> User RepoRootIsCached
+            endif
         endif
     endif
-    return project_root
+    return repo_root
 enddef
 
 def FindRootForThisMarker(pat: string): string #{{{2
-    var dir: string = isdirectory(bufname) ? bufname : bufname->fnamemodify(':h')
+    var dir: string = bufname->isdirectory() ? bufname : bufname->fnamemodify(':h')
     var dir_escaped: string = escape(dir, ' ')
 
     var match: string
     # `.git/`
-    if IsDirectory(pat)
+    if pat->IsDirectory()
         match = finddir(pat, dir_escaped .. ';')
     # `Rakefile`
     else
@@ -158,7 +162,7 @@ def FindRootForThisMarker(pat: string): string #{{{2
     #}}}
 
     # `.git/`
-    if IsDirectory(pat)
+    if pat->IsDirectory()
         # Why `return full_match` ?{{{
         #
         # If our current file is under the directory where what we found (`match`) is:
@@ -167,7 +171,7 @@ def FindRootForThisMarker(pat: string): string #{{{2
         #     ├───────────┘
         #     └ `match`
         #
-        # We don't want `/path/to` to be the root of our project.
+        # We don't want `/path/to` to be the root of our repository.
         # Instead we prefer `/path/to/.git`.
         # So, we return the latter.
         #
@@ -196,8 +200,8 @@ def FindRootForThisMarker(pat: string): string #{{{2
         var full_match: string = match->fnamemodify(':p:h')
         if stridx(dir, full_match) == 0
             return full_match
-        # Otherwise, what we found is contained right below the project root, so
-        # we return its parent.
+        # Otherwise, what  we found  is contained  right below  the root  of the
+        # repository, so we return its parent.
         else
             return match->fnamemodify(':p:h:h')
         endif
@@ -207,16 +211,17 @@ def FindRootForThisMarker(pat: string): string #{{{2
     endif
 enddef
 
-def SetCwd(directory: string) #{{{2
-    # Why `isdirectory(directory)`?{{{
+def SetCwd(dir: string) #{{{2
+    # Why `!dir->isdirectory()`?{{{
     #
     #     :sp ~/wiki/non_existing_dir/file.md
     #     E344: Can't find directory "/home/user/wiki/non_existing_dir" in cdpath~
     #     E472: Command failed~
     #}}}
-    if isdirectory(directory) && directory != winnr()->getcwd()
-        exe 'lcd ' .. fnameescape(directory)
+    if !dir->isdirectory() || dir == winnr()->getcwd()
+        return
     endif
+    exe 'lcd ' .. dir->fnameescape()
 enddef
 # }}}1
 # Utilities {{{1
@@ -333,15 +338,15 @@ def IsSpecial(): bool #{{{2
     # Why `isdirectory()`?{{{
     #
     # If we're moving in the filesystem with dirvish, or a similar plugin, while
-    # working on  a project, we want  the cwd to  stay the same, and  not change
+    # working on a repository, we want the  cwd to stay the same, and not change
     # every time we go up/down into a directory to see its contents.
     #}}}
     return !empty(&buftype) && !isdirectory(bufname)
 enddef
 
-def InSubWiki(project_root: string): bool #{{{2
+def InSubWiki(repo_root: string): bool #{{{2
 # A sub wiki is sth like `~/wiki/some_subject/`.
-    return project_root == $HOME .. '/wiki'
+    return repo_root == $HOME .. '/wiki'
         # `~/wiki/` itself is not a subwiki.
         && expand('<afile>:p:h') != $HOME .. '/wiki'
 enddef
