@@ -83,8 +83,8 @@ def CdRoot() #{{{2
         # Why this guard?{{{
         #
         #     $ cd /tmp; echo ''>r.vim; vim -S r.vim /tmp/r.vim
-        #     Error detected while processing command line:~
-        #     E484: Can't open file r.vim~
+        #     Error detected while processing command line:˜
+        #     E484: Can't open file r.vim˜
         #
         # More generally, any relative file path used in a `+''` command will be
         # completed with Vim's cwd.  If the latter is different than the shell's
@@ -188,14 +188,14 @@ def FindRootForThisMarker(pat: string): string #{{{2
         #     var full_match: string = '~/.vim/pack/mine/opt/cwd/.git/'
         #     var dir: string = '~/.vim/pack/mine/opt/cwd/.git'
         #     echo stridx(dir, full_match)
-        #     -1~
+        #     -1˜
         #
         # `:h` will remove this trailing slash:
         #
         #     var full_match: string = '~/.vim/pack/mine/opt/cwd/.git'
         #     var dir: string = '~/.vim/pack/mine/opt/cwd/.git'
         #     echo stridx(dir, full_match)
-        #     0~
+        #     0˜
         #}}}
         var full_match: string = match->fnamemodify(':p:h')
         if stridx(dir, full_match) == 0
@@ -215,8 +215,8 @@ def SetCwd(dir: string) #{{{2
     # Why `!dir->isdirectory()`?{{{
     #
     #     :sp ~/wiki/non_existing_dir/file.md
-    #     E344: Can't find directory "/home/user/wiki/non_existing_dir" in cdpath~
-    #     E472: Command failed~
+    #     E344: Can't find directory "/home/user/wiki/non_existing_dir" in cdpath˜
+    #     E472: Command failed˜
     #}}}
     if !dir->isdirectory() || dir == winnr()->getcwd()
         return
@@ -241,10 +241,10 @@ def ShouldBeIgnored(): bool #{{{2
     #     $ cd /tmp
     #     $ vim x/y.vim
     #     :echo expand('%:p')
-    #     x/y.vim~
+    #     x/y.vim˜
     #     :w
     #     :echo expand('%:p')
-    #     ~/.vim/x/y.vim~
+    #     ~/.vim/x/y.vim˜
     #     " this is wrong; I would expect the new file to be written in `/tmp/x/y.vim`
     #
     # Here's what happens.
@@ -269,29 +269,29 @@ def ShouldBeIgnored(): bool #{{{2
     #     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a /tmp/b && cd /tmp/a
     #     $ vim -Nu NONE +'cd /tmp/b' x/y
     #     :w
-    #     E212~
+    #     E212˜
     #     :call mkdir('/tmp/b/x')
     #     :w
     #     :echo expand('%:p')
-    #     /tmp/b/x/y~
+    #     /tmp/b/x/y˜
     #          ^
     #
     #     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a /tmp/b && cd /tmp/a
     #     $ vim -Nu NONE +'cd /tmp/b' y
     #     :w
-    #     /tmp/a/y~
+    #     /tmp/a/y˜
     #          ^
     #
     #     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a/x /tmp/b/x && cd /tmp/a
     #     $ vim -Nu NONE +'cd /tmp/b' x/y
     #     :w
-    #     /tmp/a/x/y~
+    #     /tmp/a/x/y˜
     #          ^
     #
     #     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a/x /tmp/b/x && cd /tmp/a
     #     $ vim -Nu NONE +'cd /tmp/b' y
     #     :w
-    #     /tmp/a/y~
+    #     /tmp/a/y˜
     #          ^
     #
     # It seems that most  of the time, Vim writes a file  (with a relative path)
@@ -318,11 +318,11 @@ def ShouldBeIgnored(): bool #{{{2
     #     :cd /tmp/a
     #     :e x/y
     #     :w
-    #     E212~
+    #     E212˜
     #     :cd /tmp/b
     #     :call mkdir('/tmp/b/x')
     #     :w
-    #     /tmp/b/x/y~
+    #     /tmp/b/x/y˜
     #          ^
     #}}}
     return index(BLACKLIST, &filetype) >= 0
