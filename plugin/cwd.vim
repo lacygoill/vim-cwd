@@ -126,8 +126,8 @@ def GetRootDir(): string #{{{2
         if !empty(repo_root)
             # cache the result
             setbufvar('%', REPO_ROOT, repo_root)
-            # we need to fire this event for `vim-indent`
-            if exists('#User#RepoRootIsCached')
+            # We need to fire this event for `vim-indent`.
+            if exists('#IndentSettings#User')
                 doautocmd <nomodeline> User RepoRootIsCached
             endif
         endif
