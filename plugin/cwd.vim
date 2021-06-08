@@ -145,10 +145,10 @@ def FindRootForThisMarker(pat: string): string #{{{2
         match = finddir(pat, dir_escaped .. ';')
     # `Rakefile`
     else
-        var sua_save: string = &suffixesadd
+        var suffixesadd_save: string = &suffixesadd
         &suffixesadd = ''
         match = findfile(pat, dir_escaped .. ';')
-        &suffixesadd = sua_save
+        &suffixesadd = suffixesadd_save
     endif
 
     if empty(match)
