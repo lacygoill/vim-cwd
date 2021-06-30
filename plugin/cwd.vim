@@ -32,7 +32,7 @@ import REPO_ROOT from 'cwd.vim'
 
 # Autocmd {{{1
 
-augroup MyCwd | au!
+augroup MyCwd | autocmd!
     # `++nested` because: https://github.com/airblade/vim-rooter/commit/eef98131fef264d0f4e4f95c42e0de476c78009c
     # `BufReadPost` is not frequent enough.{{{
     #
@@ -45,7 +45,7 @@ augroup MyCwd | au!
     # If you notice other cases where  the cwd has not been correctly set/fixed,
     # just listen to `BufEnter`.
     #}}}
-    au BufWinEnter * ++nested CdRoot()
+    autocmd BufWinEnter * ++nested CdRoot()
 augroup END
 
 # Interface {{{1
@@ -214,14 +214,14 @@ enddef
 def SetCwd(dir: string) #{{{2
     # Why `!dir->isdirectory()`?{{{
     #
-    #     :sp ~/wiki/non_existing_dir/file.md
+    #     :split ~/wiki/non_existing_dir/file.md
     #     E344: Can't find directory "/home/user/wiki/non_existing_dir" in cdpath˜
     #     E472: Command failed˜
     #}}}
     if !dir->isdirectory() || dir == winnr()->getcwd()
         return
     endif
-    exe 'lcd ' .. dir->fnameescape()
+    execute 'lcd ' .. dir->fnameescape()
 enddef
 # }}}1
 # Utilities {{{1
@@ -242,7 +242,7 @@ def ShouldBeIgnored(): bool #{{{2
     #     $ vim x/y.vim
     #     :echo expand('%:p')
     #     x/y.vim˜
-    #     :w
+    #     :write
     #     :echo expand('%:p')
     #     ~/.vim/x/y.vim˜
     #     " this is wrong; I would expect the new file to be written in `/tmp/x/y.vim`
@@ -268,29 +268,29 @@ def ShouldBeIgnored(): bool #{{{2
     #
     #     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a /tmp/b && cd /tmp/a
     #     $ vim -Nu NONE +'cd /tmp/b' x/y
-    #     :w
+    #     :write
     #     E212˜
     #     :call mkdir('/tmp/b/x')
-    #     :w
+    #     :write
     #     :echo expand('%:p')
     #     /tmp/b/x/y˜
     #          ^
     #
     #     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a /tmp/b && cd /tmp/a
     #     $ vim -Nu NONE +'cd /tmp/b' y
-    #     :w
+    #     :write
     #     /tmp/a/y˜
     #          ^
     #
     #     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a/x /tmp/b/x && cd /tmp/a
     #     $ vim -Nu NONE +'cd /tmp/b' x/y
-    #     :w
+    #     :write
     #     /tmp/a/x/y˜
     #          ^
     #
     #     $ rm -rf /tmp/a /tmp/b; mkdir -p /tmp/a/x /tmp/b/x && cd /tmp/a
     #     $ vim -Nu NONE +'cd /tmp/b' y
-    #     :w
+    #     :write
     #     /tmp/a/y˜
     #          ^
     #
@@ -308,7 +308,7 @@ def ShouldBeIgnored(): bool #{{{2
     #
     # ---
     #
-    # What about a file path provided via `:e` instead of the shell's command-line?
+    # What about a file path provided via `:edit` instead of the shell's command-line?
     # In that case,  it seems that Vim always  uses its own cwd, at  the time of
     # the first successful writing of the buffer.
     #
@@ -316,12 +316,12 @@ def ShouldBeIgnored(): bool #{{{2
     #     $ cd /tmp
     #     $ vim -Nu NONE
     #     :cd /tmp/a
-    #     :e x/y
-    #     :w
+    #     :edit x/y
+    #     :write
     #     E212˜
     #     :cd /tmp/b
     #     :call mkdir('/tmp/b/x')
-    #     :w
+    #     :write
     #     /tmp/b/x/y˜
     #          ^
     #}}}
