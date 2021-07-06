@@ -29,6 +29,14 @@ END
 var bufname: string
 
 import REPO_ROOT from 'cwd.vim'
+var INDENT_AUGROUP: string
+try
+    import AUGROUP_NAME from 'indent.vim'
+    INDENT_AUGROUP = AUGROUP_NAME
+#     E1053: Could not import ...
+#     E1048: Item not found in script: ...
+catch /^Vim\%((\a\+)\)\=:E10\%(48\|53\):/
+endtry
 
 # Autocmd {{{1
 
@@ -127,7 +135,7 @@ def GetRootDir(): string #{{{2
             # cache the result
             setbufvar('%', REPO_ROOT, repo_root)
             # We need to fire this event for `vim-indent`.
-            if exists('#SetIndentOptions#User')
+            if INDENT_AUGROUP != '' && exists('#' .. INDENT_AUGROUP .. '#User')
                 doautocmd <nomodeline> User RepoRootIsCached
             endif
         endif
