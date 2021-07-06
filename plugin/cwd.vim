@@ -127,7 +127,7 @@ def GetRootDir(): string #{{{2
             # cache the result
             setbufvar('%', REPO_ROOT, repo_root)
             # We need to fire this event for `vim-indent`.
-            if exists('#IndentSettings#User')
+            if exists('#SetIndentOptions#User')
                 doautocmd <nomodeline> User RepoRootIsCached
             endif
         endif
@@ -245,7 +245,7 @@ def ShouldBeIgnored(): bool #{{{2
     #     :write
     #     :echo expand('%:p')
     #     ~/.vim/x/y.vim˜
-    #     " this is wrong; I would expect the new file to be written in `/tmp/x/y.vim`
+    #     # this is wrong; I would expect the new file to be written in `/tmp/x/y.vim`
     #
     # Here's what happens.
     # When we enter the buffer, `vim-cwd` resets Vim's cwd from `/tmp` to `~/.vim`.
@@ -255,9 +255,9 @@ def ShouldBeIgnored(): bool #{{{2
     #     ⇔
     #     :call mkdir('x')
     #     ⇔
-    #     " create directory `getcwd() .. '/x'`
+    #     # create directory `getcwd() .. '/x'`
     #     ⇔
-    #     " create directory `~/.vim/x`
+    #     # create directory `~/.vim/x`
     #
     # Finally, Vim writes the file `~/.vim/x/y.vim`.
     #
