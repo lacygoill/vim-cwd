@@ -124,20 +124,22 @@ enddef
 # Core {{{1
 def GetRootDir(): string #{{{2
     var repo_root: string = getbufvar('%', REPO_ROOT, '')
-    if empty(repo_root)
-        for pat in ROOT_MARKER
-            repo_root = FindRootForThisMarker(pat)
-            if !empty(repo_root)
-                break
-            endif
-        endfor
-        if !empty(repo_root)
-            # cache the result
-            setbufvar('%', REPO_ROOT, repo_root)
-            # We need to fire this event for `vim-indent`.
-            if INDENT_AUGROUP != '' && exists('#' .. INDENT_AUGROUP .. '#User')
-                doautocmd <nomodeline> User RepoRootIsCached
-            endif
+    if !repo_root->empty()
+        return repo_root
+    endif
+
+    for pat in ROOT_MARKER
+        repo_root = FindRootForThisMarker(pat)
+        if !repo_root->empty()
+            break
+        endif
+    endfor
+    if !repo_root->empty()
+        # cache the result
+        setbufvar('%', REPO_ROOT, repo_root)
+        # We need to fire this event for `vim-indent`.
+        if INDENT_AUGROUP != '' && exists('#' .. INDENT_AUGROUP .. '#User')
+            doautocmd <nomodeline> User RepoRootIsCached
         endif
     endif
     return repo_root
