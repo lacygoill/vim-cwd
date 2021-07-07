@@ -130,7 +130,7 @@ def GetRootDir(): string #{{{2
         return repo_root
     endif
 
-    for pat in ROOT_MARKER
+    for pat: string in ROOT_MARKER
         repo_root = FindRootForThisMarker(pat)
         if !repo_root->empty()
             break
