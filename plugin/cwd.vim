@@ -114,7 +114,7 @@ def CdRoot() #{{{2
         # `~/wiki/foo`, and not `~/wiki`.  So, we might need to add a path component.
         if InSubWiki(repo_root)
             var dir_just_below: string = expand('<afile>:p')
-                ->matchstr('^\V' .. escape(repo_root, '\') .. '\m' .. '/\zs[^/]*')
+                ->matchstr('^\V' .. repo_root->escape('\') .. '\m' .. '/\zs[^/]*')
             repo_root ..= '/' .. dir_just_below
         endif
         SetCwd(repo_root)
@@ -123,7 +123,9 @@ enddef
 # }}}1
 # Core {{{1
 def GetRootDir(): string #{{{2
-    var repo_root: string = getbufvar('%', REPO_ROOT, '')
+    var repo_root: string = expand('<abuf>')
+        ->str2nr()
+        ->getbufvar(REPO_ROOT, '')
     if !repo_root->empty()
         return repo_root
     endif
@@ -136,7 +138,12 @@ def GetRootDir(): string #{{{2
     endfor
     if !repo_root->empty()
         # cache the result
-        setbufvar('%', REPO_ROOT, repo_root)
+        setbufvar(expand('<abuf>')->str2nr(), REPO_ROOT, repo_root)
+        # If you want the cache to be cleared when we reload the buffer:{{{
+        #
+        #     b:undo_ftplugin ..= ' | unlet! b:' .. REPO_ROOT
+        #}}}
+
         # We need to fire this event for `vim-indent`.
         if INDENT_AUGROUP != '' && exists('#' .. INDENT_AUGROUP .. '#User')
             doautocmd <nomodeline> User RepoRootIsCached
